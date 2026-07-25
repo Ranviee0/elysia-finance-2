@@ -13,3 +13,35 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+generator prismabox {
+  provider                    = "prismabox"
+  typeboxImportDependencyName = "elysia"
+  typeboxImportVariableName   = "t"
+  inputModel                  = true
+  output                      = "../generated/prismabox"
+}
+
+enum TransactionType {
+  TRANSFER_IN
+  TRANSFER_OUT
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+  color        String
+  transactions Transaction[]
+}
+
+model Transaction {
+  id              Int             @id @default(autoincrement())
+  type            TransactionType
+  amount          Decimal
+  creationTime    DateTime        @default(now())
+  transactionTime DateTime
+  category        Category?       @relation(fields: [categoryId], references: [id])
+  categoryId      Int?
+}
