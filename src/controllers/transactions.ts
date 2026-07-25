@@ -12,7 +12,10 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
         "/",
         async ({ body, status }) => {
             const { type, amount, transactionTime, categoryId, note } = body;
-            const transactions = await prisma.transaction.create({ data: { type, amount, transactionTime, categoryId, note } })
+            const transactions = await prisma.transaction.create({
+                data: { type, amount, transactionTime, categoryId, note },
+                include: { category: true },
+            })
             return status(201, transactions)
         },
         {
