@@ -43,5 +43,6 @@ model Transaction {
   creationTime    DateTime        @default(now())
   transactionTime DateTime
   category        Category?       @relation(fields: [categoryId], references: [id])
+  note            String?
   categoryId      Int?
 }

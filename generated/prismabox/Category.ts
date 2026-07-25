@@ -27,6 +27,7 @@ export const CategoryRelations = t.Object(
           amount: t.Number(),
           creationTime: t.Date(),
           transactionTime: t.Date(),
+          note: __nullable__(t.String()),
           categoryId: __nullable__(t.Integer()),
         },
         { additionalProperties: false },

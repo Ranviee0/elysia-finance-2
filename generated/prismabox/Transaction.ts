@@ -19,6 +19,7 @@ export const TransactionPlain = t.Object(
     amount: t.Number(),
     creationTime: t.Date(),
     transactionTime: t.Date(),
+    note: __nullable__(t.String()),
     categoryId: __nullable__(t.Integer()),
   },
   { additionalProperties: false },
@@ -50,6 +51,7 @@ export const TransactionPlainInputCreate = t.Object(
     amount: t.Number(),
     creationTime: t.Optional(t.Date()),
     transactionTime: t.Date(),
+    note: t.Optional(__nullable__(t.String())),
   },
   { additionalProperties: false },
 );
@@ -70,6 +72,7 @@ export const TransactionPlainInputUpdate = t.Object(
     amount: t.Optional(t.Number()),
     creationTime: t.Optional(t.Date()),
     transactionTime: t.Optional(t.Date()),
+    note: t.Optional(__nullable__(t.String())),
   },
   { additionalProperties: false },
 );
@@ -136,6 +139,7 @@ export const TransactionWhere = t.Partial(
           amount: t.Number(),
           creationTime: t.Date(),
           transactionTime: t.Date(),
+          note: t.String(),
           categoryId: t.Integer(),
         },
         { additionalProperties: false },
@@ -185,6 +189,7 @@ export const TransactionWhereUnique = t.Recursive(
               amount: t.Number(),
               creationTime: t.Date(),
               transactionTime: t.Date(),
+              note: t.String(),
               categoryId: t.Integer(),
             },
             { additionalProperties: false },
@@ -205,6 +210,7 @@ export const TransactionSelect = t.Partial(
       creationTime: t.Boolean(),
       transactionTime: t.Boolean(),
       category: t.Boolean(),
+      note: t.Boolean(),
       categoryId: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -232,6 +238,9 @@ export const TransactionOrderBy = t.Partial(
         additionalProperties: false,
       }),
       transactionTime: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      note: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
       categoryId: t.Union([t.Literal("asc"), t.Literal("desc")], {
