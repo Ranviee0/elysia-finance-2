@@ -2,6 +2,9 @@ import { Elysia, t } from "elysia";
 import { prisma } from "@/prisma";
 import { TransactionPlainInputCreate } from "@/generated/prismabox/Transaction";
 
+/* Extracting creationTime away from TransactionPlainInputCreate*/
+const { creationTime: _creationTime, ...transactionInputProperties } = TransactionPlainInputCreate.properties;
+
 export const transactionController = new Elysia({ prefix: "/transactions" })
     .get("/", async () => {
         const transactions = await prisma.transaction.findMany();
@@ -75,7 +78,7 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
         {
             body: t.Object(
                 {
-                    ...TransactionPlainInputCreate.properties,
+                    ...transactionInputProperties,
                     /* Validation that categoryId is an integer*/
                     categoryId: t.Optional(t.Nullable(t.Integer())),
                 },
