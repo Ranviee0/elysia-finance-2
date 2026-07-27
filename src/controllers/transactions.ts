@@ -86,3 +86,48 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             ),
         }
     )
+    .patch(
+        "/:id",
+        async ({ body, status, params: { id } }) => {
+            const { categoryId } = body;
+
+            let category: { connect: { id: number } } | { disconnect: true } | undefined;
+
+            if (categoryId === null) {
+                category = { disconnect: true };
+            } else if (categoryId !== undefined) {
+
+                /* Check if a category exist*/
+                const categoryExists = await prisma.category.findUnique({
+                    where: { id: categoryId },
+                });
+
+
+                /* Return 400 if doesn't exist */
+                if (!categoryExists) {
+                    return status(400, "Category not found");
+                }
+
+                /* Update category variable*/
+                category = { connect: { id: categoryId } };
+            }
+
+            const transaction = await prisma.transaction.update({
+                where: {
+                    id: Number(id),
+                },
+                data: {
+                    category
+                },
+            })
+
+            return transaction
+        },
+        {
+            body: t.Object(
+                {
+                    categoryId: t.Optional(t.Nullable(t.Integer())),
+                }
+            )
+        }
+    )
