@@ -21,17 +21,25 @@ const app = new Elysia()
         transactionTime: string;
         note: string | null;
         categoryId: number | null;
+        category: {
+          id: number,
+          name: string
+        } | null
         balance: number;
       }[];
     };
 
     const currency = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "THB",
     });
-    const dateFormat = new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
+    const dateFormat = new Intl.DateTimeFormat("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
 
     return (
@@ -53,7 +61,6 @@ const app = new Elysia()
                   <table class="table table-zebra">
                     <thead>
                       <tr>
-                        <th class="hidden sm:table-cell">ID</th>
                         <th>Type</th>
                         <th class="text-right">Amount</th>
                         <th class="hidden md:table-cell">Category</th>
@@ -67,7 +74,6 @@ const app = new Elysia()
 
                         return (
                           <tr class="row-hover">
-                            <td class="hidden sm:table-cell text-base-content/40">#{tx.id}</td>
                             <td>
                               <span class={`badge badge-sm ${isInflow ? "badge-success" : "badge-error"}`}>
                                 {tx.type}
@@ -80,7 +86,7 @@ const app = new Elysia()
                               {isInflow ? "+" : "-"}
                               {currency.format(Number(tx.amount))}
                             </td>
-                            <td class="hidden md:table-cell text-base-content/40">{tx.categoryId ?? "—"}</td>
+                            <td class="hidden md:table-cell text-base-content/40">{tx.category?.name ?? "—"} {tx.category?.id != null ? `(id: ${tx.category.id})` : "—"}</td>
                             <td class="hidden sm:table-cell">{tx.note ?? <span class="text-base-content/40">—</span>}</td>
                             <td class="text-right tabular-nums">{currency.format(tx.balance)}</td>
                           </tr>

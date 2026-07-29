@@ -7,8 +7,17 @@ const { creationTime: _creationTime, ...transactionInputProperties } = Transacti
 
 export const transactionController = new Elysia({ prefix: "/transactions" })
     .get("/", async () => {
-        const transactions = await prisma.transaction.findMany();
-
+        const transactions = await prisma.transaction.findMany({
+            include: {
+                category: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+            },
+        });
+        
         let balance = 0;
 
         const transactionsWithBalance = transactions.map((tx) => {
