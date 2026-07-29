@@ -34,6 +34,7 @@ export const categoryPage = new Elysia()
                     </button>
                   </div>
                 </div>
+                <p id="category_delete_error" class="text-error text-sm px-4 sm:px-6 pb-4 hidden"></p>
                 <div class="overflow-x-auto">
                   <table class="table table-zebra">
                     <thead>
@@ -41,6 +42,7 @@ export const categoryPage = new Elysia()
                         <th>ID</th>
                         <th>Name</th>
                         <th>Color</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -56,6 +58,21 @@ export const categoryPage = new Elysia()
                               />
                               <span class="text-base-content/60 text-sm">{category.color}</span>
                             </span>
+                          </td>
+                          <td class="text-right">
+                            <button
+                              type="button"
+                              class="btn btn-ghost btn-xs text-error"
+                              hx-delete={`/categories/${category.id}`}
+                              hx-swap="none"
+                              hx-confirm="Delete this category?"
+                              {...{
+                                "hx-on::after-request":
+                                  "if (event.detail.successful) { location.reload(); } else { category_delete_error.textContent = event.detail.xhr.responseText || 'Failed to delete category'; category_delete_error.classList.remove('hidden'); }",
+                              }}
+                            >
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}
