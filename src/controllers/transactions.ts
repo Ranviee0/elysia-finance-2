@@ -6,32 +6,46 @@ import { TransactionPlainInputCreate } from "@/generated/prismabox/Transaction";
 const { creationTime: _creationTime, ...transactionInputProperties } = TransactionPlainInputCreate.properties;
 
 export const transactionController = new Elysia({ prefix: "/transactions" })
-    .get("/", async () => {
-        const transactions = await prisma.transaction.findMany({
-            include: {
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
-                        color: true
+    .get("/",
+        async ({ query }) => {
+
+            const { from } = query;
+
+            const transactions = await prisma.transaction.findMany({
+                include: {
+                    category: {
+                        select: {
+                            id: true,
+                            name: true,
+                            color: true
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        let balance = 0;
+            let balance = 0;
 
-        const transactionsWithBalance = transactions.map((tx) => {
-            if (tx.type === "INCOME" || tx.type === "TRANSFER_IN") {
-                balance += Number(tx.amount);
-            } else if (tx.type === "EXPENSE" || tx.type === "TRANSFER_OUT") {
-                balance -= Number(tx.amount);
-            }
+            const transactionsWithBalance = transactions.map((tx) => {
+                if (tx.type === "INCOME" || tx.type === "TRANSFER_IN") {
+                    balance += Number(tx.amount);
+                } else if (tx.type === "EXPENSE" || tx.type === "TRANSFER_OUT") {
+                    balance -= Number(tx.amount);
+                }
 
-            return { ...tx, balance };
-        });
+                return { ...tx, balance };
+            })
+                .filter(
+                    (tx) => !from || tx.transactionTime.getTime() >= from.getTime()
+                );
 
-        return { transactions: transactionsWithBalance };
+
+            return { transactions: transactionsWithBalance };
+
+        }, 
+        {
+        query: t.Object({
+            from: t.Optional(t.Date()),   // t.Date coerces the string for you
+        })
     })
     .get("/until/:id", async ({ params: { id }, status }) => {
         const transactions = await prisma.transaction.findMany({
