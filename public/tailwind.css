@@ -7474,6 +7474,9 @@
   .grow {
     flex-grow: 1;
   }
+  .basis-45 {
+    flex-basis: calc(var(--spacing) * 45);
+  }
   .border-collapse {
     border-collapse: collapse;
   }
@@ -7696,6 +7699,9 @@
   }
   .items-center {
     align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
   }
   .items-start {
     align-items: flex-start;

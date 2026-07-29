@@ -1,13 +1,58 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { html, Html } from "@elysia/html";
 import { Layout } from "@/components/Layout";
 import { TransactionTable } from "@/components/TransactionTable";
 import { TransactionList } from "@/components/TransactionList";
+import { TransactionFilters } from "@/components/TransactionFilters";
 import { refreshTransactions } from "@/components/htmx";
 import type { CategoryView, TransactionView } from "@/components/types";
 
-const fetchTransactions = async () => {
-  const res = await fetch("http://localhost:3067/transactions");
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/* Value format expected by <input type="datetime-local">, in local time.
+   The API parses it as local time too, so no timezone juggling is needed. */
+const toLocalInput = (date: Date) =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+const startOfToday = () => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return toLocalInput(date);
+};
+
+const endOfToday = () => {
+  const date = new Date();
+  date.setHours(23, 59, 0, 0);
+  return toLocalInput(date);
+};
+
+/* An absent param means "first visit" and gets today's range; an empty
+   one means the user cleared that bound on purpose, so it stays empty. */
+const resolveRange = (query: { from?: string; until?: string }) => ({
+  from: query.from ?? startOfToday(),
+  until: query.until ?? endOfToday(),
+});
+
+const filterQuery = t.Object({
+  from: t.Optional(t.String()),
+  until: t.Optional(t.String()),
+});
+
+/* datetime-local omits seconds, which t.Date() won't accept, so widen it
+   to a full ISO timestamp. Invalid input is dropped rather than 422'd. */
+const toApiDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+};
+
+const fetchTransactions = async ({ from, until }: { from: string; until: string }) => {
+  const params = new URLSearchParams();
+  const fromIso = from && toApiDate(from);
+  const untilIso = until && toApiDate(until);
+  if (fromIso) params.set("from", fromIso);
+  if (untilIso) params.set("until", untilIso);
+
+  const res = await fetch(`http://localhost:3067/transactions?${params}`);
   const { transactions } = (await res.json()) as { transactions: TransactionView[] };
   return transactions;
 };
@@ -18,7 +63,15 @@ const fetchCategories = async () => {
   return categories;
 };
 
-const TransactionsContent = ({ transactions }: { transactions: TransactionView[] }) => (
+const TransactionsContent = ({
+  transactions,
+  from,
+  until,
+}: {
+  transactions: TransactionView[];
+  from: string;
+  until: string;
+}) => (
   <div id="transactions-content" class="card bg-base-100 shadow-md">
     <div class="card-body p-0">
       <div class="flex items-center justify-between gap-2 px-4 sm:px-6 pt-4 sm:pt-6 pb-4">
@@ -31,6 +84,7 @@ const TransactionsContent = ({ transactions }: { transactions: TransactionView[]
           </button>
         </div>
       </div>
+      <TransactionFilters from={from} until={until} />
       <TransactionTable transactions={transactions} />
       <TransactionList transactions={transactions} />
     </div>
@@ -39,23 +93,27 @@ const TransactionsContent = ({ transactions }: { transactions: TransactionView[]
 
 export const transactionsPage = new Elysia()
   .use(html())
-  .get("/fragments/transactions", async () => {
-    const transactions = await fetchTransactions();
-    return <TransactionsContent transactions={transactions} />;
-  })
-  .get("/", async () => {
+  .get(
+    "/fragments/transactions",
+    async ({ query }) => {
+      const range = resolveRange(query);
+      const transactions = await fetchTransactions(range);
+      return <TransactionsContent transactions={transactions} {...range} />;
+    },
+    { query: filterQuery },
+  )
+  .get("/", async ({ query }) => {
+    const range = resolveRange(query);
     const [transactions, categories] = await Promise.all([
-      fetchTransactions(),
+      fetchTransactions(range),
       fetchCategories(),
     ]);
 
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const now = new Date();
-    const nowLocal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const nowLocal = toLocalInput(new Date());
 
     return (
       <Layout title="Finance" currentPath="/">
-        <TransactionsContent transactions={transactions} />
+        <TransactionsContent transactions={transactions} {...range} />
 
         <dialog id="add_transaction_modal" class="modal modal-bottom sm:modal-middle">
           <div class="modal-box">
