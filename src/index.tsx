@@ -55,6 +55,16 @@ const app = new Elysia()
       minute: "2-digit",
       hour12: false,
     });
+    const dateOnlyFormat = new Intl.DateTimeFormat("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+    const timeOnlyFormat = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
     const pad = (n: number) => String(n).padStart(2, "0");
     const now = new Date();
@@ -86,6 +96,8 @@ const app = new Elysia()
                     <thead>
                       <tr>
                         <th>Type</th>
+                        <th class="hidden sm:table-cell">Date</th>
+                        <th class="hidden sm:table-cell">Time</th>
                         <th class="text-right">Amount</th>
                         <th class="hidden md:table-cell">Category</th>
                         <th class="hidden sm:table-cell">Note</th>
@@ -107,6 +119,8 @@ const app = new Elysia()
                                 {dateFormat.format(new Date(tx.transactionTime))}
                               </div>
                             </td>
+                            <td class="hidden sm:table-cell text-base-content/60">{dateOnlyFormat.format(new Date(tx.transactionTime))}</td>
+                            <td class="hidden sm:table-cell text-base-content/60 tabular-nums">{timeOnlyFormat.format(new Date(tx.transactionTime))}</td>
                             <td class={`text-right font-semibold tabular-nums ${isInflow ? "text-success" : "text-error"}`}>
                               {isInflow ? "+" : "-"}
                               {currency.format(Number(tx.amount))}
