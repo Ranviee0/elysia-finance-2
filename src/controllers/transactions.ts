@@ -9,7 +9,7 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
     .get("/",
         async ({ query }) => {
 
-            const { from } = query;
+            const { from, until } = query;
 
             const transactions = await prisma.transaction.findMany({
                 include: {
@@ -36,17 +36,21 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             })
                 .filter(
                     (tx) => !from || tx.transactionTime.getTime() >= from.getTime()
+                )
+                .filter(
+                    (tx) => !until || tx.transactionTime.getTime() < until.getTime()
                 );
 
 
             return { transactions: transactionsWithBalance };
 
-        }, 
+        },
         {
-        query: t.Object({
-            from: t.Optional(t.Date()),   // t.Date coerces the string for you
+            query: t.Object({
+                from: t.Optional(t.Date()),   // t.Date coerces the string for you
+                until: t.Optional(t.Date())
+            })
         })
-    })
     .get("/until/:id", async ({ params: { id }, status }) => {
         const transactions = await prisma.transaction.findMany({
             where: {
