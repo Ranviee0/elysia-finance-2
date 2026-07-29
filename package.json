@@ -3,18 +3,24 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "concurrently -n css,server -c blue,green \"tailwindcss -i ./src/styles/input.css -o ./public/tailwind.css --watch\" \"bun run --watch src/index.tsx\""
   },
   "dependencies": {
+    "@elysia/html": "^1.4.1",
     "@elysia/openapi": "^1.4.15",
+    "@elysiajs/static": "^1.4.10",
     "@prisma/client": "^7.9.0",
     "elysia": "latest",
     "prisma-adapter-bun-sqlite": "^0.8.0",
     "prismabox": "^1.1.26"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
     "bun-types": "latest",
-    "prisma": "^7.9.0"
+    "concurrently": "^10.0.4",
+    "daisyui": "^5.7.4",
+    "prisma": "^7.9.0",
+    "tailwindcss": "^4.3.3"
   },
   "module": "src/index.js"
 }
