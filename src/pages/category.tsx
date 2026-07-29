@@ -25,7 +25,7 @@ const CategoriesContent = ({ categories }: { categories: CategoryView[] }) => (
           </button>
         </div>
       </div>
-      <p id="category_delete_error" class="text-error text-sm px-4 sm:px-6 pb-4 hidden"></p>
+      <p id="category_error" class="text-error text-sm px-4 sm:px-6 pb-4 hidden"></p>
       <CategoryTable categories={categories} />
       <CategoryList categories={categories} />
     </div>

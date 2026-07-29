@@ -1,6 +1,7 @@
 import { Html } from "@elysia/html";
 import type { CategoryView } from "./types";
 import { refreshCategories } from "./htmx";
+import { CategoryColorPicker } from "./CategoryColorPicker";
 
 export const CategoryTable = ({ categories }: { categories: CategoryView[] }) => (
   <div class="hidden md:block overflow-x-auto">
@@ -20,11 +21,10 @@ export const CategoryTable = ({ categories }: { categories: CategoryView[] }) =>
             <td>{category.name}</td>
             <td>
               <span class="inline-flex items-center gap-2">
-                <span
-                  class="inline-block w-4 h-4 rounded-full border border-base-content/20"
-                  style={`background-color: ${category.color}`}
-                />
-                <span class="text-base-content/60 text-sm">{category.color}</span>
+                <CategoryColorPicker category={category} size="w-7 h-7" />
+                <span data-color-label={String(category.id)} class="text-base-content/60 text-sm font-mono">
+                  {category.color}
+                </span>
               </span>
             </td>
             <td class="text-right">
@@ -36,7 +36,7 @@ export const CategoryTable = ({ categories }: { categories: CategoryView[] }) =>
                 hx-confirm="Delete this category?"
                 hx-indicator="#categories-loading"
                 {...{
-                  "hx-on::after-request": `if (event.detail.successful) { ${refreshCategories}; } else { category_delete_error.textContent = event.detail.xhr.responseText || 'Failed to delete category'; category_delete_error.classList.remove('hidden'); }`,
+                  "hx-on::after-request": `if (event.detail.successful) { ${refreshCategories}; } else { category_error.textContent = event.detail.xhr.responseText || 'Failed to delete category'; category_error.classList.remove('hidden'); }`,
                 }}
               >
                 Delete
