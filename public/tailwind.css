@@ -5773,6 +5773,9 @@
       border-radius: calc( min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)) - var(--border) );
     }
   }
+  .z-10 {
+    z-index: 10;
+  }
   @layer daisyui.l1.l2.l3 {
     .tab-content {
       order: var(--tabcontent-order);
@@ -6553,6 +6556,11 @@
       opacity: 60%;
       font-weight: 600;
     }
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
+  }
+  @layer daisyui.l1.l2.l3 {
     .carousel-item {
       box-sizing: content-box;
       display: flex;
@@ -7284,6 +7292,9 @@
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
+  .max-h-60 {
+    max-height: calc(var(--spacing) * 60);
+  }
   .min-h-full {
     min-height: 100%;
   }
@@ -7397,6 +7408,9 @@
   }
   .w-10 {
     width: calc(var(--spacing) * 10);
+  }
+  .w-40 {
+    width: calc(var(--spacing) * 40);
   }
   .w-76 {
     width: calc(var(--spacing) * 76);
@@ -7639,6 +7653,9 @@
   .flex-row {
     flex-direction: row;
   }
+  .flex-nowrap {
+    flex-wrap: nowrap;
+  }
   .flex-wrap {
     flex-wrap: wrap;
   }
@@ -7671,6 +7688,9 @@
   }
   .overflow-x-auto {
     overflow-x: auto;
+  }
+  .overflow-y-auto {
+    overflow-y: auto;
   }
   .otp-joined {
     --otp-gap: 0rem;
@@ -9085,6 +9105,10 @@
     --tw-duration: 12000ms;
     transition-duration: 12000ms;
   }
+  .ease-in-out {
+    --tw-ease: var(--ease-in-out);
+    transition-timing-function: var(--ease-in-out);
+  }
   .ease-out {
     --tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);
@@ -9818,6 +9842,11 @@
         height: 100%;
         object-fit: cover;
       }
+    }
+    .sm\:w-56 {
+      width: calc(var(--spacing) * 56);
+    }
+    @layer daisyui.l1.l2 {
       .sm\:alert-horizontal {
         justify-content: start;
         justify-items: start;

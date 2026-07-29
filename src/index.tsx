@@ -15,8 +15,11 @@ const app = new Elysia()
   .use(transactionController)
   .use(categoryPage)
   .get("/", async () => {
-    const res = await fetch("http://localhost:3067/transactions");
-    const { transactions } = (await res.json()) as {
+    const [transactionsRes, categoriesRes] = await Promise.all([
+      fetch("http://localhost:3067/transactions"),
+      fetch("http://localhost:3067/categories"),
+    ]);
+    const { transactions } = (await transactionsRes.json()) as {
       transactions: {
         id: number;
         type: string;
@@ -30,6 +33,13 @@ const app = new Elysia()
           color: string
         } | null
         balance: number;
+      }[];
+    };
+    const { categories } = (await categoriesRes.json()) as {
+      categories: {
+        id: number;
+        name: string;
+        color: string;
       }[];
     };
 
@@ -46,12 +56,17 @@ const app = new Elysia()
       hour12: false,
     });
 
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const now = new Date();
+    const nowLocal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
     return (
       <html lang="en" data-theme="light">
         <head>
           <title>Finance</title>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="stylesheet" href="/public/tailwind.css" />
+          <script src="/vendor/htmx/htmx.min.js"></script>
         </head>
         <body class="min-h-screen bg-base-200 flex justify-center p-2 sm:p-10">
           <div class="w-full max-w-4xl">
@@ -59,7 +74,12 @@ const app = new Elysia()
               <div class="card-body p-0">
                 <div class="flex items-baseline justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4">
                   <h1 class="card-title text-lg sm:text-xl">Transactions</h1>
-                  <span class="text-sm text-base-content/60">{transactions.length} entries</span>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-base-content/60">{transactions.length} entries</span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="add_transaction_modal.showModal()">
+                      + Add Transaction
+                    </button>
+                  </div>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="table table-zebra">
@@ -110,6 +130,75 @@ const app = new Elysia()
               </div>
             </div>
           </div>
+
+          <dialog id="add_transaction_modal" class="modal">
+            <div class="modal-box">
+              <h3 class="font-bold text-lg">Add Transaction</h3>
+              <form
+                id="add-transaction-form"
+                class="mt-4 flex flex-col gap-4"
+                hx-post="/transactions"
+                hx-swap="none"
+                {...{
+                  "hx-on::config-request":
+                    "if (!event.detail.parameters.categoryId) delete event.detail.parameters.categoryId; if (event.detail.parameters.transactionTime) event.detail.parameters.transactionTime = new Date(event.detail.parameters.transactionTime).toISOString();",
+                  "hx-on::after-request":
+                    "if (event.detail.successful) { add_transaction_modal.close(); location.reload(); } else { add_transaction_error.textContent = 'Failed to create transaction'; add_transaction_error.classList.remove('hidden'); }",
+                }}
+              >
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Type</legend>
+                  <select name="type" required class="select w-full">
+                    <option value="EXPENSE">Expense</option>
+                    <option value="INCOME">Income</option>
+                    <option value="TRANSFER_OUT">Transfer out</option>
+                    <option value="TRANSFER_IN">Transfer in</option>
+                  </select>
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Amount</legend>
+                  <input type="number" name="amount" step="0.01" min="0" required class="input w-full" placeholder="0.00" />
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Category</legend>
+                  <label class="input w-full mb-2">
+                    <input
+                      type="search"
+                      class="grow"
+                      placeholder="Search"
+                      oninput="Array.from(category_id_select.options).forEach((o) => { o.hidden = o.value !== '' && !o.textContent.toLowerCase().includes(this.value.toLowerCase()); });"
+                    />
+                  </label>
+                  <select id="category_id_select" name="categoryId" class="select w-full">
+                    <option value="">No category</option>
+                    {categories.map((category) => (
+                      <option value={String(category.id)}>{category.name}</option>
+                    ))}
+                  </select>
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Date & time</legend>
+                  <input type="datetime-local" name="transactionTime" required class="input w-full" value={nowLocal} />
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Note</legend>
+                  <input type="text" name="note" class="input w-full" placeholder="Optional" />
+                </fieldset>
+                <p id="add_transaction_error" class="text-error text-sm hidden"></p>
+                <div class="modal-action">
+                  <button type="button" class="btn" onclick="add_transaction_modal.close()">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
         </body>
       </html>
     );

@@ -89,8 +89,9 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             body: t.Object(
                 {
                     ...transactionInputProperties,
+                    amount: t.Numeric(),
                     /* Validation that categoryId is an integer*/
-                    categoryId: t.Optional(t.Nullable(t.Integer())),
+                    categoryId: t.Optional(t.Nullable(t.Numeric())),
                 },
                 { additionalProperties: false },
             ),
