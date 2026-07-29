@@ -90,6 +90,7 @@ const app = new Elysia()
                         <th class="hidden md:table-cell">Category</th>
                         <th class="hidden sm:table-cell">Note</th>
                         <th class="text-right">Balance</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -121,6 +122,20 @@ const app = new Elysia()
                             </td>
                             <td class="hidden sm:table-cell">{tx.note ?? <span class="text-base-content/40">—</span>}</td>
                             <td class="text-right tabular-nums">{currency.format(tx.balance)}</td>
+                            <td class="text-right">
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-xs text-error"
+                                hx-delete={`/transactions/${tx.id}`}
+                                hx-swap="none"
+                                hx-confirm="Delete this transaction?"
+                                {...{
+                                  "hx-on::after-request": "if (event.detail.successful) location.reload();",
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}
