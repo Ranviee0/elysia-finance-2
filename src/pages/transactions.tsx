@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { TransactionTable } from "@/components/TransactionTable";
 import { TransactionList } from "@/components/TransactionList";
 import { TransactionFilters } from "@/components/TransactionFilters";
-import { refreshTransactions } from "@/components/htmx";
+import { errorMessage, refreshTransactions } from "@/components/htmx";
 import type { CategoryView, TransactionView } from "@/components/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -127,7 +127,7 @@ export const transactionsPage = new Elysia()
               {...{
                 "hx-on::config-request":
                   "if (!event.detail.parameters.categoryId) delete event.detail.parameters.categoryId; if (event.detail.parameters.transactionTime) event.detail.parameters.transactionTime = new Date(event.detail.parameters.transactionTime).toISOString();",
-                "hx-on::after-request": `if (event.detail.successful) { add_transaction_modal.close(); this.reset(); add_transaction_error.classList.add('hidden'); ${refreshTransactions}; } else { add_transaction_error.textContent = 'Failed to create transaction'; add_transaction_error.classList.remove('hidden'); }`,
+                "hx-on::after-request": `if (event.detail.successful) { add_transaction_modal.close(); this.reset(); add_transaction_error.classList.add('hidden'); ${refreshTransactions}; } else { add_transaction_error.textContent = ${errorMessage("Failed to create transaction")}; add_transaction_error.classList.remove('hidden'); }`,
               }}
             >
               <fieldset class="fieldset">

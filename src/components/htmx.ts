@@ -9,3 +9,20 @@ export const refreshTransactions =
 
 export const refreshCategories =
   "htmx.ajax('GET', '/fragments/categories', { target: '#categories-content', swap: 'outerHTML' })";
+
+/* Reads the server's message out of a failed request. Handler routes reply
+   with a plain string, while Elysia's own validation errors come back as
+   JSON, so both shapes are unwrapped before falling back. */
+export const errorMessage = (fallback: string) => {
+  /* Single-quoted: the result is inlined into a double-quoted attribute. */
+  const quoted = `'${fallback.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+
+  return (
+    `(function () {` +
+    `const body = event.detail.xhr.responseText;` +
+    `if (!body) return ${quoted};` +
+    `try { const parsed = JSON.parse(body); return parsed.summary || parsed.message || ${quoted}; }` +
+    `catch (e) { return body; }` +
+    `})()`
+  );
+};
