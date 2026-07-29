@@ -19,6 +19,7 @@ export const categoryPage = new Elysia()
           <title>Categories</title>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="stylesheet" href="/public/tailwind.css" />
+          <script src="/vendor/htmx/htmx.min.js"></script>
         </head>
         <body class="min-h-screen bg-base-200 flex justify-center p-2 sm:p-10">
           <div class="w-full max-w-4xl">
@@ -26,7 +27,12 @@ export const categoryPage = new Elysia()
               <div class="card-body p-0">
                 <div class="flex items-baseline justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4">
                   <h1 class="card-title text-lg sm:text-xl">Categories</h1>
-                  <span class="text-sm text-base-content/60">{categories.length} entries</span>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-base-content/60">{categories.length} entries</span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="add_category_modal.showModal()">
+                      + Add Category
+                    </button>
+                  </div>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="table table-zebra">
@@ -59,6 +65,53 @@ export const categoryPage = new Elysia()
               </div>
             </div>
           </div>
+
+          <dialog id="add_category_modal" class="modal">
+            <div class="modal-box">
+              <h3 class="font-bold text-lg">Add Category</h3>
+              <form
+                id="add-category-form"
+                class="mt-4 flex flex-col gap-4"
+                hx-post="/categories"
+                hx-swap="none"
+                {...{
+                  "hx-on::after-request":
+                    "if (event.detail.successful) { add_category_modal.close(); location.reload(); } else { add_category_error.textContent = 'Failed to create category'; add_category_error.classList.remove('hidden'); }",
+                }}
+              >
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Name</legend>
+                  <input type="text" name="name" required class="input w-full" placeholder="e.g. Groceries" />
+                </fieldset>
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">Color</legend>
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="color"
+                      name="color"
+                      required
+                      class="w-10 h-10 rounded-md border border-base-content/20 p-0.5 shrink-0"
+                      value="#6366f1"
+                      oninput="category_color_hex.value = this.value"
+                    />
+                    <input id="category_color_hex" type="text" class="input w-full font-mono" value="#6366f1" disabled />
+                  </div>
+                </fieldset>
+                <p id="add_category_error" class="text-error text-sm hidden"></p>
+                <div class="modal-action">
+                  <button type="button" class="btn" onclick="add_category_modal.close()">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
         </body>
       </html>
     );
