@@ -21,6 +21,9 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                         },
                     },
                 },
+                orderBy: {
+                    transactionTime: "asc",
+                },
             });
 
             let balance = 0;
@@ -51,48 +54,6 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                 until: t.Optional(t.Date())
             })
         })
-    .get("/until/:id", async ({ params: { id }, status }) => {
-        const transactions = await prisma.transaction.findMany({
-            where: {
-                id: {
-                    lte: Number(id), // id < n
-                },
-            },
-        });
-
-        let balance = 0;
-
-        const transactionsWithBalance = transactions.map((tx) => {
-            if (tx.type === "INCOME" || tx.type === "TRANSFER_IN") {
-                balance += Number(tx.amount);
-            } else if (tx.type === "EXPENSE" || tx.type === "TRANSFER_OUT") {
-                balance -= Number(tx.amount);
-            }
-
-            return { ...tx, balance };
-        });
-
-        return { transactions: transactionsWithBalance };
-    })
-    .get("/since/:id", async ({ params: { id }, status }) => {
-        const transactions = await prisma.transaction.findMany();
-
-        let balance = 0;
-
-        const transactionsWithBalance = transactions
-            .map((tx) => {
-                if (tx.type === "INCOME" || tx.type === "TRANSFER_IN") {
-                    balance += Number(tx.amount);
-                } else if (tx.type === "EXPENSE" || tx.type === "TRANSFER_OUT") {
-                    balance -= Number(tx.amount);
-                }
-
-                return { ...tx, balance };
-            })
-            .filter((tx) => tx.id >= Number(id));
-
-        return { transactions: transactionsWithBalance };
-    })
     .post(
         "/",
         async ({ body, status }) => {
