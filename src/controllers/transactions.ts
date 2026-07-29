@@ -58,6 +58,17 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
         "/",
         async ({ body, status }) => {
             const { type, amount, transactionTime, categoryId, note } = body;
+
+            const transactionsWithExactSameTime = await prisma.transaction.findMany({
+                where: {
+                    transactionTime: transactionTime,
+                },
+            });
+
+            if (transactionsWithExactSameTime.length > 0) {
+                return status(400, "Transaction time clash! Please select new time that is at least 1 minutes apart.")
+            }
+
             const transactions = await prisma.transaction.create({
                 data: { type, amount, transactionTime, categoryId, note },
                 include: { category: true },
