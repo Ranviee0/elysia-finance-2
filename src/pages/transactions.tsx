@@ -5,6 +5,7 @@ import { TransactionTable } from "@/components/TransactionTable";
 import { TransactionList } from "@/components/TransactionList";
 import { TransactionFilters } from "@/components/TransactionFilters";
 import { errorMessage, refreshTransactions } from "@/components/htmx";
+import { apiBase } from "@/config";
 import type { CategoryView, TransactionView } from "@/components/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -52,13 +53,13 @@ const fetchTransactions = async ({ from, until }: { from: string; until: string 
   if (fromIso) params.set("from", fromIso);
   if (untilIso) params.set("until", untilIso);
 
-  const res = await fetch(`http://localhost:3067/transactions?${params}`);
+  const res = await fetch(`${apiBase}/transactions?${params}`);
   const { transactions } = (await res.json()) as { transactions: TransactionView[] };
   return transactions;
 };
 
 const fetchCategories = async () => {
-  const res = await fetch("http://localhost:3067/categories");
+  const res = await fetch(`${apiBase}/categories`);
   const { categories } = (await res.json()) as { categories: CategoryView[] };
   return categories;
 };

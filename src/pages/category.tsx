@@ -5,9 +5,10 @@ import { CategoryTable } from "@/components/CategoryTable";
 import { CategoryList } from "@/components/CategoryList";
 import { refreshCategories } from "@/components/htmx";
 import type { CategoryView } from "@/components/types";
+import { apiBase } from "@/config";
 
 const fetchCategories = async () => {
-  const res = await fetch("http://localhost:3067/categories");
+  const res = await fetch(`${apiBase}/categories`);
   const { categories } = (await res.json()) as { categories: CategoryView[] };
   return categories;
 };

@@ -6,6 +6,7 @@ import { transactionController } from "./controllers/transactions";
 import { categoryPage } from "./pages/category";
 import { transactionsPage } from "./pages/transactions";
 import { exportPage } from "./pages/export";
+import { port } from "./config";
 
 const app = new Elysia()
   .use(openapi())
@@ -16,7 +17,9 @@ const app = new Elysia()
   .use(transactionsPage)
   .use(categoryPage)
   .use(exportPage)
-  .listen(3067);
+  /* Binding all interfaces, not loopback, so a container's ingress can
+     actually reach the server. */
+  .listen({ port, hostname: "0.0.0.0" });
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
