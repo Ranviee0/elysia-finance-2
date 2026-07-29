@@ -59,6 +59,59 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             }),
             requireUser: true
         })
+    /* Per-category totals for one calendar month, which is all the pie charts
+       on the analytics page need. Transfers are left out on purpose: moving
+       money between your own accounts isn't income or expense. */
+    .get("/summary",
+        async ({ query, user }) => {
+            const [year, month] = query.month.split("-").map(Number);
+
+            /* Built from local parts, matching how the rest of the app reads
+               the clock — a month runs to the start of the next one. */
+            const start = new Date(year!, month! - 1, 1);
+            const end = new Date(year!, month!, 1);
+
+            const transactions = await prisma.transaction.findMany({
+                where: {
+                    userId: user.id,
+                    transactionTime: { gte: start, lt: end },
+                },
+                include: { category: { select: { id: true, name: true, color: true } } },
+            });
+
+            const groupByCategory = (type: "INCOME" | "EXPENSE") => {
+                const totals = new Map<number | null, { categoryId: number | null; name: string; color: string | null; total: number }>();
+
+                for (const tx of transactions) {
+                    if (tx.type !== type) continue;
+
+                    const key = tx.categoryId;
+                    const slice = totals.get(key) ?? {
+                        categoryId: key,
+                        name: tx.category?.name ?? "Uncategorized",
+                        /* No colour of its own — the chart paints it gray. */
+                        color: tx.category?.color ?? null,
+                        total: 0,
+                    };
+
+                    slice.total += Number(tx.amount);
+                    totals.set(key, slice);
+                }
+
+                return [...totals.values()].sort((a, b) => b.total - a.total);
+            };
+
+            return {
+                income: groupByCategory("INCOME"),
+                expense: groupByCategory("EXPENSE"),
+            };
+        },
+        {
+            query: t.Object({
+                month: t.String({ pattern: "^\\d{4}-\\d{2}$" }),
+            }),
+            requireUser: true,
+        })
     .get("/csv", async ({ user }) => {
         const transactions = await prisma.transaction.findMany({
             where: { userId: user.id },

@@ -6,6 +6,7 @@ import { transactionController } from "./controllers/transactions";
 import { categoryPage } from "./pages/category";
 import { transactionsPage } from "./pages/transactions";
 import { exportPage } from "./pages/export";
+import { analyticsPage } from "./pages/analytics";
 import { authPage } from "./pages/auth";
 import { port } from "./config";
 
@@ -19,6 +20,7 @@ const app = new Elysia()
   .use(transactionsPage)
   .use(categoryPage)
   .use(exportPage)
+  .use(analyticsPage)
   /* Binding all interfaces, not loopback, so a container's ingress can
      actually reach the server. */
   .listen({ port, hostname: "0.0.0.0" });

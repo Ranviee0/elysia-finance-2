@@ -2,6 +2,7 @@ import { Html } from "@elysia/html";
 
 const links = [
   { href: "/", label: "Transactions" },
+  { href: "/analytics", label: "Analytics" },
   { href: "/category", label: "Categories" },
   { href: "/export", label: "Export" },
 ];
@@ -38,6 +39,24 @@ const CategoriesIcon = () => (
       d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
     />
     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+  </svg>
+);
+
+const AnalyticsIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.8"
+    stroke="currentColor"
+    class="w-5 h-5"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z"
+    />
+    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
   </svg>
 );
 
@@ -181,17 +200,19 @@ export const Layout = ({
           <TransactionsIcon />
           <span class="dock-label">Transactions</span>
         </a>
+        <a href="/analytics" class={currentPath === "/analytics" ? "dock-active" : ""}>
+          <AnalyticsIcon />
+          <span class="dock-label">Analytics</span>
+        </a>
         <a href="/category" class={currentPath === "/category" ? "dock-active" : ""}>
           <CategoriesIcon />
           <span class="dock-label">Categories</span>
         </a>
+        {/* Account isn't here: the header dropdown shows at every width, and a
+            fifth dock item squeezes the labels to nothing on a phone. */}
         <a href="/export" class={currentPath === "/export" ? "dock-active" : ""}>
           <ExportIcon />
           <span class="dock-label">Export</span>
-        </a>
-        <a href="/account" class={currentPath === "/account" ? "dock-active" : ""}>
-          <AccountIcon />
-          <span class="dock-label">Account</span>
         </a>
       </nav>
     </body>
