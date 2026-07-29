@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@/prisma";
 import { TransactionPlainInputCreate } from "@/generated/prismabox/Transaction";
+import { csvResponse, stampedFilename, toCsv } from "@/csv";
 
 /* Extracting creationTime away from TransactionPlainInputCreate*/
 const { creationTime: _creationTime, ...transactionInputProperties } = TransactionPlainInputCreate.properties;
@@ -54,6 +55,27 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                 until: t.Optional(t.Date())
             })
         })
+    .get("/csv", async () => {
+        const transactions = await prisma.transaction.findMany({
+            include: { category: { select: { name: true } } },
+        });
+
+        const csv = toCsv(
+            ["id", "type", "amount", "transactionTime", "creationTime", "categoryId", "category", "note"],
+            transactions.map((tx) => [
+                tx.id,
+                tx.type,
+                tx.amount,
+                tx.transactionTime,
+                tx.creationTime,
+                tx.categoryId,
+                tx.category?.name,
+                tx.note,
+            ]),
+        );
+
+        return csvResponse(stampedFilename("transactions"), csv);
+    })
     .post(
         "/",
         async ({ body, status }) => {

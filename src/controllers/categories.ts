@@ -1,11 +1,22 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "@/prisma";
 import { CategoryPlainInputCreate } from "@/generated/prismabox/Category";
+import { csvResponse, stampedFilename, toCsv } from "@/csv";
 
 export const categoryController = new Elysia({ prefix: "/categories" })
     .get("/", async () => {
         const categories = await prisma.category.findMany();
         return { categories }
+    })
+    .get("/csv", async () => {
+        const categories = await prisma.category.findMany();
+
+        const csv = toCsv(
+            ["id", "name", "color"],
+            categories.map((category) => [category.id, category.name, category.color]),
+        );
+
+        return csvResponse(stampedFilename("categories"), csv);
     })
     .post(
         "/",

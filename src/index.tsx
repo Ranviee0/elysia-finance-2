@@ -5,6 +5,7 @@ import { categoryController } from "./controllers/categories";
 import { transactionController } from "./controllers/transactions";
 import { categoryPage } from "./pages/category";
 import { transactionsPage } from "./pages/transactions";
+import { exportPage } from "./pages/export";
 
 const app = new Elysia()
   .use(openapi())
@@ -14,6 +15,7 @@ const app = new Elysia()
   .use(transactionController)
   .use(transactionsPage)
   .use(categoryPage)
+  .use(exportPage)
   .listen(3067);
 
 console.log(

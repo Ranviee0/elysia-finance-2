@@ -7970,6 +7970,12 @@
   .border-base-content {
     border-color: var(--color-base-content);
   }
+  .border-base-content\/10 {
+    border-color: var(--color-base-content);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+    }
+  }
   .border-base-content\/20 {
     border-color: var(--color-base-content);
     @supports (color: color-mix(in lab, red, red)) {
