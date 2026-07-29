@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { prisma } from "@/prisma";
 import { CategoryPlainInputCreate } from "@/generated/prismabox/Category";
 
@@ -39,5 +39,37 @@ export const categoryController = new Elysia({ prefix: "/categories" })
                 },
             })
             return categoryDeleted
+        }
+    )
+    .patch(
+        "/color/:id",
+        async ({ body, status, params: { id } }) => {
+            const { color } = body;
+
+            const category = await prisma.category.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            })
+            if (!category) {
+                return status(400, "Category does not exist")
+            }
+
+            const categoryWithNewColor = await prisma.category.update({
+                where: {
+                    id: Number(id)
+                },
+                data: {
+                    color
+                }
+            })
+            return categoryWithNewColor
+        },
+        {
+            body: t.Object(
+                {
+                    color: t.String()
+                }
+            )
         }
     )
