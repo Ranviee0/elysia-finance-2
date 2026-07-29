@@ -16,3 +16,28 @@ export const categoryController = new Elysia({ prefix: "/categories" })
         },
         { body: CategoryPlainInputCreate },
     )
+    .delete(
+        "/:id",
+        async ({ status, params: { id } }) => {
+            const category = await prisma.category.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            })
+            if (!category) {
+                return status(400, "Category does not exist")
+            }
+            const transactions = await prisma.transaction.findMany({
+                where: { categoryId: Number(id) },
+            });
+            if (transactions.length > 0) {
+                return status(400, "Please delete all transactions that are referencing this category first.");
+            }
+            const categoryDeleted = await prisma.category.delete({
+                where: {
+                    id: Number(id),
+                },
+            })
+            return categoryDeleted
+        }
+    )
