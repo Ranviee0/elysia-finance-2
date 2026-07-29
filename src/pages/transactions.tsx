@@ -6,6 +6,8 @@ import { TransactionList } from "@/components/TransactionList";
 import { TransactionFilters } from "@/components/TransactionFilters";
 import { errorMessage, refreshTransactions } from "@/components/htmx";
 import { apiBase } from "@/config";
+import { auth } from "@/auth";
+import { forwardCookie } from "@/internalFetch";
 import type { CategoryView, TransactionView } from "@/components/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -46,20 +48,23 @@ const toApiDate = (value: string) => {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
-const fetchTransactions = async ({ from, until }: { from: string; until: string }) => {
+const fetchTransactions = async (
+  { from, until }: { from: string; until: string },
+  request: Request,
+) => {
   const params = new URLSearchParams();
   const fromIso = from && toApiDate(from);
   const untilIso = until && toApiDate(until);
   if (fromIso) params.set("from", fromIso);
   if (untilIso) params.set("until", untilIso);
 
-  const res = await fetch(`${apiBase}/transactions?${params}`);
+  const res = await fetch(`${apiBase}/transactions?${params}`, { headers: forwardCookie(request) });
   const { transactions } = (await res.json()) as { transactions: TransactionView[] };
   return transactions;
 };
 
-const fetchCategories = async () => {
-  const res = await fetch(`${apiBase}/categories`);
+const fetchCategories = async (request: Request) => {
+  const res = await fetch(`${apiBase}/categories`, { headers: forwardCookie(request) });
   const { categories } = (await res.json()) as { categories: CategoryView[] };
   return categories;
 };
@@ -94,26 +99,27 @@ const TransactionsContent = ({
 
 export const transactionsPage = new Elysia()
   .use(html())
+  .use(auth)
   .get(
     "/fragments/transactions",
-    async ({ query }) => {
+    async ({ query, request }) => {
       const range = resolveRange(query);
-      const transactions = await fetchTransactions(range);
+      const transactions = await fetchTransactions(range, request);
       return <TransactionsContent transactions={transactions} {...range} />;
     },
-    { query: filterQuery },
+    { query: filterQuery, requirePage: true },
   )
-  .get("/", async ({ query }) => {
+  .get("/", async ({ query, request, user }) => {
     const range = resolveRange(query);
     const [transactions, categories] = await Promise.all([
-      fetchTransactions(range),
-      fetchCategories(),
+      fetchTransactions(range, request),
+      fetchCategories(request),
     ]);
 
     const nowLocal = toLocalInput(new Date());
 
     return (
-      <Layout title="Finance" currentPath="/">
+      <Layout title="Finance" currentPath="/" user={user}>
         <TransactionsContent transactions={transactions} {...range} />
 
         <dialog id="add_transaction_modal" class="modal modal-bottom sm:modal-middle">
@@ -186,4 +192,4 @@ export const transactionsPage = new Elysia()
         </dialog>
       </Layout>
     );
-  });
+  }, { requirePage: true });

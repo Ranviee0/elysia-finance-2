@@ -1,4 +1,6 @@
 export * from "./TransactionType";
+export * from "./User";
+export * from "./Session";
 export * from "./Category";
 export * from "./Transaction";
 export * from "./__nullable__";

@@ -58,13 +58,67 @@ const ExportIcon = () => (
   </svg>
 );
 
+const AccountIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.8"
+    stroke="currentColor"
+    class="w-5 h-5"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+    />
+  </svg>
+);
+
+/* Log out is a POST so that a prefetch or a stray <img src> can't end a
+   session, which is why these are submit buttons rather than links.
+   The form sits outside the menu and the buttons reach it by id: daisyUI
+   styles `li > *` as the row, so wrapping each button in its own form would
+   hand the padding and the hover highlight to the form while leaving the
+   button itself only as wide as its text — a row that lights up edge to edge
+   but only responds to clicks that land on the glyphs. */
+const AccountMenu = ({ username }: { username: string }) => (
+  <details class="dropdown dropdown-end">
+    <summary class="btn btn-ghost btn-sm">
+      <AccountIcon />
+      <span class="max-w-24 truncate">{username}</span>
+    </summary>
+    <form id="logout-form" method="post" action="/auth/logout" hx-boost="false" class="hidden"></form>
+    <ul class="dropdown-content menu bg-base-100 rounded-box z-30 w-52 p-2 shadow-md">
+      <li>
+        <a href="/account">Change password</a>
+      </li>
+      {/* Switching accounts is logging out and back in, so it posts to the
+          same route — it's here as a separate entry because that's the verb
+          people look for. */}
+      <li>
+        <button type="submit" form="logout-form">
+          Switch user
+        </button>
+      </li>
+      <li>
+        <button type="submit" form="logout-form" class="text-error">
+          Log out
+        </button>
+      </li>
+    </ul>
+  </details>
+);
+
 export const Layout = ({
   title,
   currentPath,
+  user,
   children,
 }: {
   title: string;
   currentPath: string;
+  user?: { username: string } | null;
   children?: any;
 }) => (
   <html lang="en" data-theme="light">
@@ -83,17 +137,24 @@ export const Layout = ({
             Finance
           </a>
         </div>
-        <nav role="tablist" class="tabs tabs-box hidden sm:flex">
-          {links.map((link) => (
-            <a
-              role="tab"
-              href={link.href}
-              class={`tab ${currentPath === link.href ? "tab-active" : ""}`}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        {user ? (
+          <>
+            <nav role="tablist" class="tabs tabs-box hidden sm:flex">
+              {links.map((link) => (
+                <a
+                  role="tab"
+                  href={link.href}
+                  class={`tab ${currentPath === link.href ? "tab-active" : ""}`}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+            <div class="ml-2">
+              <AccountMenu username={user.username} />
+            </div>
+          </>
+        ) : null}
       </header>
       <main class="flex justify-center p-2 sm:p-6">
         <div class="w-full max-w-4xl">{children}</div>
@@ -115,7 +176,7 @@ export const Layout = ({
           <button>close</button>
         </form>
       </dialog>
-      <nav class="dock bg-base-100 sm:hidden z-20">
+      <nav class={`dock bg-base-100 sm:hidden z-20 ${user ? "" : "hidden"}`}>
         <a href="/" class={currentPath === "/" ? "dock-active" : ""}>
           <TransactionsIcon />
           <span class="dock-label">Transactions</span>
@@ -127,6 +188,10 @@ export const Layout = ({
         <a href="/export" class={currentPath === "/export" ? "dock-active" : ""}>
           <ExportIcon />
           <span class="dock-label">Export</span>
+        </a>
+        <a href="/account" class={currentPath === "/account" ? "dock-active" : ""}>
+          <AccountIcon />
+          <span class="dock-label">Account</span>
         </a>
       </nav>
     </body>

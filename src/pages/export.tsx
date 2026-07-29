@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { html, Html } from "@elysia/html";
 import { Layout } from "@/components/Layout";
+import { auth } from "@/auth";
 
 const DownloadIcon = () => (
   <svg
@@ -42,8 +43,8 @@ const ExportRow = ({
   </div>
 );
 
-export const exportPage = new Elysia().use(html()).get("/export", () => (
-  <Layout title="Export" currentPath="/export">
+export const exportPage = new Elysia().use(html()).use(auth).get("/export", ({ user }) => (
+  <Layout title="Export" currentPath="/export" user={user}>
     <div class="card bg-base-100 shadow-md">
       <div class="card-body gap-4">
         <div>
@@ -66,4 +67,4 @@ export const exportPage = new Elysia().use(html()).get("/export", () => (
       </div>
     </div>
   </Layout>
-));
+), { requirePage: true });

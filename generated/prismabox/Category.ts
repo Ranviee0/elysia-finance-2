@@ -5,12 +5,21 @@ import { __transformDate__ } from "./__transformDate__";
 import { __nullable__ } from "./__nullable__";
 
 export const CategoryPlain = t.Object(
-  { id: t.Integer(), name: t.String(), color: t.String() },
+  { id: t.Integer(), name: t.String(), color: t.String(), userId: t.Integer() },
   { additionalProperties: false },
 );
 
 export const CategoryRelations = t.Object(
   {
+    user: t.Object(
+      {
+        id: t.Integer(),
+        username: t.String(),
+        passwordHash: t.String(),
+        createdAt: t.Date(),
+      },
+      { additionalProperties: false },
+    ),
     transactions: t.Array(
       t.Object(
         {
@@ -29,6 +38,7 @@ export const CategoryRelations = t.Object(
           transactionTime: t.Date(),
           note: __nullable__(t.String()),
           categoryId: __nullable__(t.Integer()),
+          userId: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -50,6 +60,17 @@ export const CategoryPlainInputUpdate = t.Object(
 
 export const CategoryRelationsInputCreate = t.Object(
   {
+    user: t.Object(
+      {
+        connect: t.Object(
+          {
+            id: t.Integer({ additionalProperties: false }),
+          },
+          { additionalProperties: false },
+        ),
+      },
+      { additionalProperties: false },
+    ),
     transactions: t.Optional(
       t.Object(
         {
@@ -73,6 +94,17 @@ export const CategoryRelationsInputCreate = t.Object(
 export const CategoryRelationsInputUpdate = t.Partial(
   t.Object(
     {
+      user: t.Object(
+        {
+          connect: t.Object(
+            {
+              id: t.Integer({ additionalProperties: false }),
+            },
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
       transactions: t.Partial(
         t.Object(
           {
@@ -114,6 +146,7 @@ export const CategoryWhere = t.Partial(
           id: t.Integer(),
           name: t.String(),
           color: t.String(),
+          userId: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -126,12 +159,30 @@ export const CategoryWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            {
+              id: t.Integer(),
+              userId_name: t.Object(
+                { userId: t.Integer(), name: t.String() },
+                { additionalProperties: false },
+              ),
+            },
+            { additionalProperties: false },
+          ),
           { additionalProperties: false },
         ),
-        t.Union([t.Object({ id: t.Integer() })], {
-          additionalProperties: false,
-        }),
+        t.Union(
+          [
+            t.Object({ id: t.Integer() }),
+            t.Object({
+              userId_name: t.Object(
+                { userId: t.Integer(), name: t.String() },
+                { additionalProperties: false },
+              ),
+            }),
+          ],
+          { additionalProperties: false },
+        ),
         t.Partial(
           t.Object({
             AND: t.Union([
@@ -148,7 +199,12 @@ export const CategoryWhereUnique = t.Recursive(
         ),
         t.Partial(
           t.Object(
-            { id: t.Integer(), name: t.String(), color: t.String() },
+            {
+              id: t.Integer(),
+              name: t.String(),
+              color: t.String(),
+              userId: t.Integer(),
+            },
             { additionalProperties: false },
           ),
         ),
@@ -164,6 +220,8 @@ export const CategorySelect = t.Partial(
       id: t.Boolean(),
       name: t.Boolean(),
       color: t.Boolean(),
+      user: t.Boolean(),
+      userId: t.Boolean(),
       transactions: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -173,7 +231,7 @@ export const CategorySelect = t.Partial(
 
 export const CategoryInclude = t.Partial(
   t.Object(
-    { transactions: t.Boolean(), _count: t.Boolean() },
+    { user: t.Boolean(), transactions: t.Boolean(), _count: t.Boolean() },
     { additionalProperties: false },
   ),
 );
@@ -188,6 +246,9 @@ export const CategoryOrderBy = t.Partial(
         additionalProperties: false,
       }),
       color: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      userId: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },

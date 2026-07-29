@@ -21,6 +21,7 @@ export const TransactionPlain = t.Object(
     transactionTime: t.Date(),
     note: __nullable__(t.String()),
     categoryId: __nullable__(t.Integer()),
+    userId: t.Integer(),
   },
   { additionalProperties: false },
 );
@@ -29,9 +30,23 @@ export const TransactionRelations = t.Object(
   {
     category: __nullable__(
       t.Object(
-        { id: t.Integer(), name: t.String(), color: t.String() },
+        {
+          id: t.Integer(),
+          name: t.String(),
+          color: t.String(),
+          userId: t.Integer(),
+        },
         { additionalProperties: false },
       ),
+    ),
+    user: t.Object(
+      {
+        id: t.Integer(),
+        username: t.String(),
+        passwordHash: t.String(),
+        createdAt: t.Date(),
+      },
+      { additionalProperties: false },
     ),
   },
   { additionalProperties: false },
@@ -92,6 +107,17 @@ export const TransactionRelationsInputCreate = t.Object(
         { additionalProperties: false },
       ),
     ),
+    user: t.Object(
+      {
+        connect: t.Object(
+          {
+            id: t.Integer({ additionalProperties: false }),
+          },
+          { additionalProperties: false },
+        ),
+      },
+      { additionalProperties: false },
+    ),
   },
   { additionalProperties: false },
 );
@@ -112,6 +138,17 @@ export const TransactionRelationsInputUpdate = t.Partial(
           },
           { additionalProperties: false },
         ),
+      ),
+      user: t.Object(
+        {
+          connect: t.Object(
+            {
+              id: t.Integer({ additionalProperties: false }),
+            },
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
       ),
     },
     { additionalProperties: false },
@@ -141,6 +178,7 @@ export const TransactionWhere = t.Partial(
           transactionTime: t.Date(),
           note: t.String(),
           categoryId: t.Integer(),
+          userId: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -191,6 +229,7 @@ export const TransactionWhereUnique = t.Recursive(
               transactionTime: t.Date(),
               note: t.String(),
               categoryId: t.Integer(),
+              userId: t.Integer(),
             },
             { additionalProperties: false },
           ),
@@ -212,6 +251,8 @@ export const TransactionSelect = t.Partial(
       category: t.Boolean(),
       note: t.Boolean(),
       categoryId: t.Boolean(),
+      user: t.Boolean(),
+      userId: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
@@ -220,7 +261,12 @@ export const TransactionSelect = t.Partial(
 
 export const TransactionInclude = t.Partial(
   t.Object(
-    { type: t.Boolean(), category: t.Boolean(), _count: t.Boolean() },
+    {
+      type: t.Boolean(),
+      category: t.Boolean(),
+      user: t.Boolean(),
+      _count: t.Boolean(),
+    },
     { additionalProperties: false },
   ),
 );
@@ -244,6 +290,9 @@ export const TransactionOrderBy = t.Partial(
         additionalProperties: false,
       }),
       categoryId: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      userId: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },

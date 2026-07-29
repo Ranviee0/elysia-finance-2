@@ -29,11 +29,40 @@ enum TransactionType {
   EXPENSE
 }
 
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  sessions     Session[]
+  categories   Category[]
+  transactions Transaction[]
+}
+
+/* Sessions live in the database rather than in a signed cookie so that a
+   logout or a password change can actually revoke them. */
+model Session {
+  id        String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
 model Category {
   id           Int           @id @default(autoincrement())
   name         String
   color        String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
   transactions Transaction[]
+
+  /* Names only have to be unique within an account, so two users can both
+     keep a "Groceries". */
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model Transaction {
@@ -45,4 +74,8 @@ model Transaction {
   category        Category?       @relation(fields: [categoryId], references: [id])
   note            String?
   categoryId      Int?
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          Int
+
+  @@index([userId])
 }

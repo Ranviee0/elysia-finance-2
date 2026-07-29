@@ -6,9 +6,11 @@ import { CategoryList } from "@/components/CategoryList";
 import { refreshCategories } from "@/components/htmx";
 import type { CategoryView } from "@/components/types";
 import { apiBase } from "@/config";
+import { auth } from "@/auth";
+import { forwardCookie } from "@/internalFetch";
 
-const fetchCategories = async () => {
-  const res = await fetch(`${apiBase}/categories`);
+const fetchCategories = async (request: Request) => {
+  const res = await fetch(`${apiBase}/categories`, { headers: forwardCookie(request) });
   const { categories } = (await res.json()) as { categories: CategoryView[] };
   return categories;
 };
@@ -35,15 +37,16 @@ const CategoriesContent = ({ categories }: { categories: CategoryView[] }) => (
 
 export const categoryPage = new Elysia()
   .use(html())
-  .get("/fragments/categories", async () => {
-    const categories = await fetchCategories();
+  .use(auth)
+  .get("/fragments/categories", async ({ request }) => {
+    const categories = await fetchCategories(request);
     return <CategoriesContent categories={categories} />;
-  })
-  .get("/category", async () => {
-    const categories = await fetchCategories();
+  }, { requirePage: true })
+  .get("/category", async ({ request, user }) => {
+    const categories = await fetchCategories(request);
 
     return (
-      <Layout title="Categories" currentPath="/category">
+      <Layout title="Categories" currentPath="/category" user={user}>
         <CategoriesContent categories={categories} />
 
         <dialog id="add_category_modal" class="modal modal-bottom sm:modal-middle">
@@ -94,4 +97,4 @@ export const categoryPage = new Elysia()
         </dialog>
       </Layout>
     );
-  });
+  }, { requirePage: true });

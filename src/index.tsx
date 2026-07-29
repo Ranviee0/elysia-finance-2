@@ -6,12 +6,14 @@ import { transactionController } from "./controllers/transactions";
 import { categoryPage } from "./pages/category";
 import { transactionsPage } from "./pages/transactions";
 import { exportPage } from "./pages/export";
+import { authPage } from "./pages/auth";
 import { port } from "./config";
 
 const app = new Elysia()
   .use(openapi())
   .use(staticPlugin({ maxAge: 0 }))
   .use(staticPlugin({ assets: "node_modules/htmx.org/dist", prefix: "/vendor/htmx", maxAge: 0 }))
+  .use(authPage)
   .use(categoryController)
   .use(transactionController)
   .use(transactionsPage)
