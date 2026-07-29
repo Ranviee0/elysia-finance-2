@@ -142,3 +142,24 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             )
         }
     )
+    .delete(
+        "/:id",
+        async ({ status, params: { id } }) => {
+
+            const transactionExists = await prisma.transaction.findUnique({
+                where: { id: Number(id) },
+            });
+
+            if (!transactionExists) {
+                return status(400, "Transaction not found");
+            }
+
+
+            const transaction = await prisma.transaction.delete({
+                where: {
+                    id: Number(id),
+                },
+            })
+            return transaction
+        }
+    )
