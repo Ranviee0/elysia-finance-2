@@ -13,11 +13,12 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                     select: {
                         id: true,
                         name: true,
+                        color: true
                     },
                 },
             },
         });
-        
+
         let balance = 0;
 
         const transactionsWithBalance = transactions.map((tx) => {

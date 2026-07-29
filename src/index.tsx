@@ -4,6 +4,7 @@ import { html, Html } from "@elysia/html";
 import { staticPlugin } from "@elysiajs/static";
 import { categoryController } from "./controllers/categories";
 import { transactionController } from "./controllers/transactions";
+import { categoryPage } from "./pages/category";
 
 const app = new Elysia()
   .use(openapi())
@@ -11,6 +12,7 @@ const app = new Elysia()
   .use(staticPlugin())
   .use(categoryController)
   .use(transactionController)
+  .use(categoryPage)
   .get("/", async () => {
     const res = await fetch("http://localhost:3067/transactions");
     const { transactions } = (await res.json()) as {
@@ -24,6 +26,7 @@ const app = new Elysia()
         category: {
           id: number,
           name: string
+          color: string
         } | null
         balance: number;
       }[];
@@ -86,7 +89,15 @@ const app = new Elysia()
                               {isInflow ? "+" : "-"}
                               {currency.format(Number(tx.amount))}
                             </td>
-                            <td class="hidden md:table-cell text-base-content/40">{tx.category?.name ?? "—"} {tx.category?.id != null ? `(id: ${tx.category.id})` : "—"}</td>
+                            <td class="hidden md:table-cell text-base-content/40">
+                              <div class="flex flex-row gap-2">
+                                <span
+                                  class="inline-block w-4 h-4 rounded-full border border-base-content/20"
+                                  style={`background-color: ${tx.category?.color}`}
+                                />
+                                {tx.category?.name ?? "—"} {tx.category?.id != null ? `(id: ${tx.category.id})` : "—"}
+                              </div>
+                            </td>
                             <td class="hidden sm:table-cell">{tx.note ?? <span class="text-base-content/40">—</span>}</td>
                             <td class="text-right tabular-nums">{currency.format(tx.balance)}</td>
                           </tr>
