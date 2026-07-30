@@ -15,6 +15,13 @@ ENV DATABASE_URL="file:/app/data/app.db"
 ENV PORT=3067
 ENV NODE_ENV=production
 
+# Pages are rendered on the server, so the container clock is the one the UI
+# reads: timestamps are stored as UTC, and everything user-facing — formatted
+# times, the "today" filter range, the analytics month boundaries — is derived
+# in whatever zone this names. A container defaulting to UTC shows Bangkok
+# entries seven hours early. Override for a different locale.
+ENV TZ=Asia/Bangkok
+
 RUN bun --bun run prisma generate \
     && bunx tailwindcss -i ./src/styles/input.css -o ./public/tailwind.css
 
