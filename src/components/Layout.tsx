@@ -4,7 +4,9 @@ const links = [
   { href: "/", label: "Transactions" },
   { href: "/analytics", label: "Analytics" },
   { href: "/category", label: "Categories" },
-  { href: "/export", label: "Export" },
+  /* The page carries both import and export now, so the tab can't be "Export"
+     without hiding half of what's there. */
+  { href: "/export", label: "Data" },
 ];
 
 const TransactionsIcon = () => (
@@ -212,7 +214,7 @@ export const Layout = ({
             fifth dock item squeezes the labels to nothing on a phone. */}
         <a href="/export" class={currentPath === "/export" ? "dock-active" : ""}>
           <ExportIcon />
-          <span class="dock-label">Export</span>
+          <span class="dock-label">Data</span>
         </a>
       </nav>
     </body>
