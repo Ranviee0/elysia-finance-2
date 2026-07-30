@@ -24,6 +24,7 @@ is set in Coolify.
    | --- | --- | --- |
    | `DATABASE_URL` | `file:/app/data/app.db` | Already the Dockerfile default; set it explicitly so it is visible. |
    | `COOKIE_SECURE` | `1` | Once the domain is served over HTTPS. Without it the session cookie is sent in the clear. |
+   | `TZ` | `Asia/Bangkok` | Already the Dockerfile default. Pages render on the server, so this clock decides displayed times, the "today" filter, and analytics months. Leaving a container on UTC shows entries seven hours early. |
 5. Set the domain, then **Deploy**.
 
 ## Triggering deploys
