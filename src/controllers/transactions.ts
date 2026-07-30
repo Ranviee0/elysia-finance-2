@@ -3,6 +3,7 @@ import { prisma } from "@/prisma";
 import { auth } from "@/auth";
 import { TransactionPlainInputCreate } from "@/generated/prismabox/Transaction";
 import { csvResponse, stampedFilename, toCsv } from "@/csv";
+import { TransactionType } from "@/generated/prisma/enums";
 
 /* Extracting creationTime away from TransactionPlainInputCreate*/
 const { creationTime: _creationTime, ...transactionInputProperties } = TransactionPlainInputCreate.properties;
@@ -185,7 +186,7 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
         }
     )
     .patch(
-        "/:id",
+        "/category/:id",
         async ({ body, status, params: { id }, user }) => {
             const { categoryId } = body;
 
@@ -243,4 +244,116 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             return { id: Number(id) }
         },
         { requireUser: true }
+    )
+    .patch(
+        "/type/:id",
+        async ({ body, status, params: { id }, user }) => {
+            const { type } = body;
+
+            const updated = await prisma.transaction.updateMany({
+                where: {
+                    id: Number(id),
+                    userId: user.id,
+                },
+                data: {
+                    type,
+                },
+            })
+
+            if (updated.count === 0) {
+                return status(400, "Transaction not found");
+            }
+
+            return prisma.transaction.findUnique({ where: { id: Number(id) } })
+        },
+        {
+            body: t.Object({
+                type: t.Enum(TransactionType),
+            }),
+            requireUser: true
+        }
+    )
+    .patch(
+        "/time/:id",
+        async ({ body, status, params: { id }, user }) => {
+            const { transactionTime } = body;
+
+            const updated = await prisma.transaction.updateMany({
+                where: {
+                    id: Number(id),
+                    userId: user.id,
+                },
+                data: {
+                    transactionTime,
+                },
+            })
+
+            if (updated.count === 0) {
+                return status(400, "Transaction not found");
+            }
+
+            return prisma.transaction.findUnique({ where: { id: Number(id) } })
+        },
+        {
+            body: t.Object({
+                transactionTime: t.Date(),
+            }),
+            requireUser: true
+        }
+    )
+    .patch(
+        "/amount/:id",
+        async ({ body, status, params: { id }, user }) => {
+            const { amount } = body;
+
+            const updated = await prisma.transaction.updateMany({
+                where: {
+                    id: Number(id),
+                    userId: user.id,
+                },
+                data: {
+                    amount,
+                },
+            })
+
+            if (updated.count === 0) {
+                return status(400, "Transaction not found");
+            }
+
+            return prisma.transaction.findUnique({ where: { id: Number(id) } })
+        },
+        {
+            body: t.Object({
+                amount: t.Number(),
+            }),
+            requireUser: true
+        }
+    )
+    .patch(
+        "/note/:id",
+        async ({ body, status, params: { id }, user }) => {
+            const { note } = body;
+
+            const updated = await prisma.transaction.updateMany({
+                where: {
+                    id: Number(id),
+                    userId: user.id,
+                },
+                data: {
+                    note,
+                },
+            })
+
+            if (updated.count === 0) {
+                return status(400, "Transaction not found");
+            }
+
+            return prisma.transaction.findUnique({ where: { id: Number(id) } })
+        },
+        {
+            body: t.Object({
+                note: t.String(),
+            }),
+            requireUser: true
+        }
     )
