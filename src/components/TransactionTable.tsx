@@ -2,6 +2,7 @@ import { Html } from "@elysia/html";
 import type { TransactionView } from "./types";
 import { currency, dateOnlyFormat, timeOnlyFormat, isInflow } from "./format";
 import { refreshTransactions } from "./htmx";
+import { EditableField } from "./EditableField";
 
 export const TransactionTable = ({ transactions }: { transactions: TransactionView[] }) => (
   <div class="hidden md:block overflow-x-auto">
@@ -25,22 +26,32 @@ export const TransactionTable = ({ transactions }: { transactions: TransactionVi
           return (
             <tr class="row-hover">
               <td>
-                <span class={`badge badge-sm ${inflow ? "badge-success" : "badge-error"}`}>
-                  {tx.type}
-                </span>
+                <EditableField transaction={tx} field="type">
+                  <span class={`badge badge-sm ${inflow ? "badge-success" : "badge-error"}`}>
+                    {tx.type}
+                  </span>
+                </EditableField>
               </td>
+              {/* Date and time are one field on the row and one route on the
+                  server, so either cell opens the same editor. */}
               <td class="text-base-content/60">
-                {dateOnlyFormat.format(new Date(tx.transactionTime))}
+                <EditableField transaction={tx} field="time">
+                  {dateOnlyFormat.format(new Date(tx.transactionTime))}
+                </EditableField>
               </td>
               <td class="text-base-content/60 tabular-nums">
-                {timeOnlyFormat.format(new Date(tx.transactionTime))}
+                <EditableField transaction={tx} field="time">
+                  {timeOnlyFormat.format(new Date(tx.transactionTime))}
+                </EditableField>
               </td>
               <td class={`text-right font-semibold tabular-nums ${inflow ? "text-success" : "text-error"}`}>
-                {inflow ? "+" : "-"}
-                {currency.format(Number(tx.amount))}
+                <EditableField transaction={tx} field="amount">
+                  {inflow ? "+" : "-"}
+                  {currency.format(Number(tx.amount))}
+                </EditableField>
               </td>
               <td class="text-base-content/40">
-                <div class="flex flex-row items-center gap-2">
+                <EditableField transaction={tx} field="category" class="flex flex-row items-center gap-2">
                   {tx.category ? (
                     <>
                       <span
@@ -52,11 +63,15 @@ export const TransactionTable = ({ transactions }: { transactions: TransactionVi
                   ) : (
                     "—"
                   )}
-                </div>
+                </EditableField>
               </td>
-              <td>{tx.note ?? <span class="text-base-content/40">—</span>}</td>
+              <td>
+                <EditableField transaction={tx} field="note">
+                  {tx.note ?? <span class="text-base-content/40">—</span>}
+                </EditableField>
+              </td>
               <td class="text-right tabular-nums">{currency.format(tx.balance)}</td>
-              <td class="text-right">
+              <td class="text-right whitespace-nowrap">
                 <button
                   type="button"
                   class="btn btn-ghost btn-xs text-error"

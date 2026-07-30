@@ -38,7 +38,11 @@ const CategoriesContent = ({ categories }: { categories: CategoryView[] }) => (
 export const categoryPage = new Elysia()
   .use(html())
   .use(auth)
-  .get("/fragments/categories", async ({ request }) => {
+  .get("/fragments/categories", async ({ request, set }) => {
+    /* Same reason as the transactions fragment: one URL, refetched after every
+       change, with nothing telling the browser not to keep the first answer. */
+    set.headers["cache-control"] = "no-store";
+
     const categories = await fetchCategories(request);
     return <CategoriesContent categories={categories} />;
   }, { requirePage: true })

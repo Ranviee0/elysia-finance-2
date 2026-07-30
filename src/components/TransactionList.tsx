@@ -2,6 +2,7 @@ import { Html } from "@elysia/html";
 import type { TransactionView } from "./types";
 import { currency, dateOnlyFormat, timeOnlyFormat, isInflow } from "./format";
 import { refreshTransactions } from "./htmx";
+import { TransactionEditMenuButton } from "./TransactionEditMenuButton";
 
 export const TransactionList = ({ transactions }: { transactions: TransactionView[] }) => (
   <ul class="list md:hidden">
@@ -48,6 +49,9 @@ export const TransactionList = ({ transactions }: { transactions: TransactionVie
               </span>
             </div>
           </div>
+          {/* A row's fields are far too small to aim at on a phone, so editing
+              starts from one big target and picks the field from a list. */}
+          <TransactionEditMenuButton transaction={tx} />
           <button
             type="button"
             class="btn btn-ghost btn-square text-error"
