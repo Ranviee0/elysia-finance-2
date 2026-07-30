@@ -1,0 +1,12 @@
+node_modules
+generated
+.git
+.env
+*.db
+*.db-journal
+*.db-wal
+docs
+.claude
+.agents
+.windsurf
+**/*.log

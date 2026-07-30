@@ -43,3 +43,6 @@ package-lock.json
 **/*.bun
 /generated/prisma
 
+
+# local env (values are set in Coolify for deploys)
+.env
