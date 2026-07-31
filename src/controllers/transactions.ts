@@ -77,11 +77,11 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                     userId: user.id,
                     transactionTime: { gte: start, lt: end },
                 },
-                include: { category: { select: { id: true, name: true, color: true } } },
+                include: { category: { select: { id: true, name: true, color: true, categoryType: true } } },
             });
 
             const groupByCategory = (type: "INCOME" | "EXPENSE") => {
-                const totals = new Map<number | null, { categoryId: number | null; name: string; color: string | null; total: number }>();
+                const totals = new Map<number | null, { categoryId: number | null; name: string; color: string | null; categoryType: string; total: number }>();
 
                 for (const tx of transactions) {
                     if (tx.type !== type) continue;
@@ -92,6 +92,10 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                         name: tx.category?.name ?? "Uncategorized",
                         /* No colour of its own — the chart paints it gray. */
                         color: tx.category?.color ?? null,
+                        /* Uncategorized transactions have no category to carry
+                           a type, so they land in the same unnamed group as
+                           categories that were never classified. */
+                        categoryType: tx.category?.categoryType ?? "",
                         total: 0,
                     };
 
@@ -99,7 +103,24 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
                     totals.set(key, slice);
                 }
 
-                return [...totals.values()].sort((a, b) => b.total - a.total);
+                const slices = [...totals.values()];
+
+                /* The pie walks this array in order, so the sort is what puts
+                   same-typed categories side by side on the chart rather than
+                   scattered around it. Groups lead with the largest combined
+                   total and each group is internally biggest-first, so the
+                   ordering still reads by size; name breaks ties so the same
+                   month always renders identically. */
+                const groupTotals = new Map<string, number>();
+                for (const slice of slices) {
+                    groupTotals.set(slice.categoryType, (groupTotals.get(slice.categoryType) ?? 0) + slice.total);
+                }
+
+                return slices.sort((a, b) =>
+                    groupTotals.get(b.categoryType)! - groupTotals.get(a.categoryType)! ||
+                    a.categoryType.localeCompare(b.categoryType) ||
+                    b.total - a.total ||
+                    a.name.localeCompare(b.name));
             };
 
             return {

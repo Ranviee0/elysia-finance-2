@@ -13,6 +13,9 @@ export type SummarySlice = {
   categoryId: number | null;
   name: string;
   color: string | null;
+  /* Empty for uncategorized transactions and for categories nobody has
+     classified yet; both read as one group. */
+  categoryType: string;
   total: number;
 };
 

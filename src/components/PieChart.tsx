@@ -55,6 +55,15 @@ export const PieChart = ({
     return <EmptyState message={emptyMessage} />;
   }
 
+  /* Subtotals for the group headers, and the count that decides whether the
+     headers earn their space at all — with everything in one group they would
+     just be a banner repeating the total. */
+  const groupTotals = new Map<string, number>();
+  for (const slice of slices) {
+    groupTotals.set(slice.categoryType, (groupTotals.get(slice.categoryType) ?? 0) + slice.total);
+  }
+  const showGroups = groupTotals.size > 1;
+
   let angle = 0;
   const drawn = slices.map((slice) => {
     const share = slice.total / total;
@@ -117,25 +126,47 @@ export const PieChart = ({
             </tr>
           </thead>
           <tbody>
-            {drawn.map(({ slice, share }) => (
-              <tr>
-                <td>
-                  <span class="inline-flex items-center gap-2">
-                    <span
-                      class="inline-block w-3 h-3 rounded-full border border-base-content/20 shrink-0"
-                      style={`background-color: ${sliceColor(slice)}`}
-                    ></span>
-                    <span class={slice.categoryId === null ? "text-base-content/60" : ""}>
-                      {slice.name}
+            {drawn.flatMap(({ slice, share }, index) => {
+              /* The API already ordered same-typed slices together, so a
+                 change of type between neighbours is exactly a group break. */
+              const startsGroup =
+                showGroups && slice.categoryType !== drawn[index - 1]?.slice.categoryType;
+
+              return [
+                ...(startsGroup
+                  ? [
+                      <tr class="bg-base-200">
+                        <th class="text-xs uppercase tracking-wide text-base-content/60">
+                          {slice.categoryType || "No type"}
+                        </th>
+                        <th class="text-right tabular-nums text-xs">
+                          {currency.format(groupTotals.get(slice.categoryType)!)}
+                        </th>
+                        <th class="text-right tabular-nums text-xs text-base-content/60">
+                          {((groupTotals.get(slice.categoryType)! / total) * 100).toFixed(1)}%
+                        </th>
+                      </tr>,
+                    ]
+                  : []),
+                <tr>
+                  <td>
+                    <span class={`inline-flex items-center gap-2 ${showGroups ? "pl-3" : ""}`}>
+                      <span
+                        class="inline-block w-3 h-3 rounded-full border border-base-content/20 shrink-0"
+                        style={`background-color: ${sliceColor(slice)}`}
+                      ></span>
+                      <span class={slice.categoryId === null ? "text-base-content/60" : ""}>
+                        {slice.name}
+                      </span>
                     </span>
-                  </span>
-                </td>
-                <td class="text-right tabular-nums">{currency.format(slice.total)}</td>
-                <td class="text-right tabular-nums text-base-content/60">
-                  {(share * 100).toFixed(1)}%
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td class="text-right tabular-nums">{currency.format(slice.total)}</td>
+                  <td class="text-right tabular-nums text-base-content/60">
+                    {(share * 100).toFixed(1)}%
+                  </td>
+                </tr>,
+              ];
+            })}
           </tbody>
           <tfoot>
             <tr>
