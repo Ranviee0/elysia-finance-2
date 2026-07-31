@@ -39,8 +39,10 @@ model User {
   transactions Transaction[]
 }
 
-/* Sessions live in the database rather than in a signed cookie so that a
-   logout or a password change can actually revoke them. */
+/**
+ * Sessions live in the database rather than in a signed cookie so that a
+ * logout or a password change can actually revoke them.
+ */
 model Session {
   id        String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -54,13 +56,18 @@ model Session {
 model Category {
   id           Int           @id @default(autoincrement())
   name         String
+  /* Empty until categories are actually classified — the 46 rows that predate
+     this field have no meaningful value to backfill with. */
+  categoryType String        @default("")
   color        String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
   transactions Transaction[]
 
-  /* Names only have to be unique within an account, so two users can both
-     keep a "Groceries". */
+  /**
+   * Names only have to be unique within an account, so two users can both
+   * keep a "Groceries".
+   */
   @@unique([userId, name])
   @@index([userId])
 }

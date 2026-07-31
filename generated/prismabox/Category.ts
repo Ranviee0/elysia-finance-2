@@ -5,7 +5,13 @@ import { __transformDate__ } from "./__transformDate__";
 import { __nullable__ } from "./__nullable__";
 
 export const CategoryPlain = t.Object(
-  { id: t.Integer(), name: t.String(), color: t.String(), userId: t.Integer() },
+  {
+    id: t.Integer(),
+    name: t.String(),
+    categoryType: t.String(),
+    color: t.String(),
+    userId: t.Integer(),
+  },
   { additionalProperties: false },
 );
 
@@ -49,12 +55,16 @@ export const CategoryRelations = t.Object(
 );
 
 export const CategoryPlainInputCreate = t.Object(
-  { name: t.String(), color: t.String() },
+  { name: t.String(), categoryType: t.String(), color: t.String() },
   { additionalProperties: false },
 );
 
 export const CategoryPlainInputUpdate = t.Object(
-  { name: t.Optional(t.String()), color: t.Optional(t.String()) },
+  {
+    name: t.Optional(t.String()),
+    categoryType: t.Optional(t.String()),
+    color: t.Optional(t.String()),
+  },
   { additionalProperties: false },
 );
 
@@ -145,6 +155,7 @@ export const CategoryWhere = t.Partial(
           OR: t.Array(Self, { additionalProperties: false }),
           id: t.Integer(),
           name: t.String(),
+          categoryType: t.String(),
           color: t.String(),
           userId: t.Integer(),
         },
@@ -202,6 +213,7 @@ export const CategoryWhereUnique = t.Recursive(
             {
               id: t.Integer(),
               name: t.String(),
+              categoryType: t.String(),
               color: t.String(),
               userId: t.Integer(),
             },
@@ -219,6 +231,7 @@ export const CategorySelect = t.Partial(
     {
       id: t.Boolean(),
       name: t.Boolean(),
+      categoryType: t.Boolean(),
       color: t.Boolean(),
       user: t.Boolean(),
       userId: t.Boolean(),
@@ -243,6 +256,9 @@ export const CategoryOrderBy = t.Partial(
         additionalProperties: false,
       }),
       name: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      categoryType: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
       color: t.Union([t.Literal("asc"), t.Literal("desc")], {

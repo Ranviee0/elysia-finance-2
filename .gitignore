@@ -46,3 +46,7 @@ package-lock.json
 
 # local env (values are set in Coolify for deploys)
 .env
+
+# built by tailwind (dev script and Docker build); scanning it as a source
+# makes tailwind read its own output, so it must stay untracked
+public/tailwind.css

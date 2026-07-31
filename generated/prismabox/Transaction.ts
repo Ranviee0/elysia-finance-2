@@ -33,6 +33,7 @@ export const TransactionRelations = t.Object(
         {
           id: t.Integer(),
           name: t.String(),
+          categoryType: t.String(),
           color: t.String(),
           userId: t.Integer(),
         },

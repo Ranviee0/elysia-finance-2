@@ -26,8 +26,9 @@ export const UserRelations = t.Object(
         },
         {
           additionalProperties: false,
-          description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+          description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
         },
       ),
       { additionalProperties: false },
@@ -37,6 +38,7 @@ logout or a password change can actually revoke them.`,
         {
           id: t.Integer(),
           name: t.String(),
+          categoryType: t.String(),
           color: t.String(),
           userId: t.Integer(),
         },

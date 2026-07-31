@@ -4,6 +4,14 @@ import { auth } from "@/auth";
 import { CategoryPlainInputCreate } from "@/generated/prismabox/Category";
 import { csvResponse, stampedFilename, toCsv } from "@/csv";
 
+/* prismabox marks categoryType required because the model declares it as a
+   plain String; the column defaults to empty, and nothing in the UI sets a
+   type yet, so callers are allowed to leave it off. */
+const CreateCategoryBody = t.Object(
+    { ...CategoryPlainInputCreate.properties, categoryType: t.Optional(t.String()) },
+    { additionalProperties: false },
+);
+
 export const categoryController = new Elysia({ prefix: "/categories" })
     .use(auth)
     .get("/", async ({ user }) => {
@@ -23,7 +31,7 @@ export const categoryController = new Elysia({ prefix: "/categories" })
     .post(
         "/",
         async ({ body, status, user }) => {
-            const { name, color } = body;
+            const { name, color, categoryType } = body;
 
             /* Names are unique per account, so report a duplicate as the
                user's mistake instead of letting Prisma throw a 500. */
@@ -34,10 +42,12 @@ export const categoryController = new Elysia({ prefix: "/categories" })
                 return status(400, "You already have a category with that name.");
             }
 
-            const category = await prisma.category.create({ data: { name, color, userId: user.id } });
+            const category = await prisma.category.create({
+                data: { name, color, categoryType: categoryType ?? "", userId: user.id },
+            });
             return status(201, category);
         },
-        { body: CategoryPlainInputCreate, requireUser: true },
+        { body: CreateCategoryBody, requireUser: true },
     )
     .delete(
         "/:id",
@@ -97,6 +107,40 @@ export const categoryController = new Elysia({ prefix: "/categories" })
             body: t.Object(
                 {
                     color: t.String()
+                }
+            ),
+            requireUser: true
+        }
+    )
+    .patch(
+        "/category-type/:id",
+        async ({ body, status, params: { id }, user }) => {
+            const { categoryType } = body;
+
+            const category = await prisma.category.findFirst({
+                where: {
+                    id: Number(id),
+                    userId: user.id
+                }
+            })
+            if (!category) {
+                return status(400, "Category does not exist")
+            }
+
+            const categoryWithNewType = await prisma.category.update({
+                where: {
+                    id: Number(id)
+                },
+                data: {
+                    categoryType
+                }
+            })
+            return categoryWithNewType
+        },
+        {
+            body: t.Object(
+                {
+                    categoryType: t.String()
                 }
             ),
             requireUser: true

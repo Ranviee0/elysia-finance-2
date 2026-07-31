@@ -13,8 +13,9 @@ export const SessionPlain = t.Object(
   },
   {
     additionalProperties: false,
-    description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+    description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
   },
 );
 
@@ -32,8 +33,9 @@ export const SessionRelations = t.Object(
   },
   {
     additionalProperties: false,
-    description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+    description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
   },
 );
 
@@ -41,8 +43,9 @@ export const SessionPlainInputCreate = t.Object(
   { expiresAt: t.Date() },
   {
     additionalProperties: false,
-    description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+    description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
   },
 );
 
@@ -50,8 +53,9 @@ export const SessionPlainInputUpdate = t.Object(
   { expiresAt: t.Optional(t.Date()) },
   {
     additionalProperties: false,
-    description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+    description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
   },
 );
 
@@ -71,8 +75,9 @@ export const SessionRelationsInputCreate = t.Object(
   },
   {
     additionalProperties: false,
-    description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+    description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
   },
 );
 
@@ -93,8 +98,9 @@ export const SessionRelationsInputUpdate = t.Partial(
     },
     {
       additionalProperties: false,
-      description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+      description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
     },
   ),
 );
@@ -114,8 +120,9 @@ export const SessionWhere = t.Partial(
         },
         {
           additionalProperties: false,
-          description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+          description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
         },
       ),
     { $id: "Session" },
@@ -131,8 +138,9 @@ export const SessionWhereUnique = t.Recursive(
             { id: t.String() },
             {
               additionalProperties: false,
-              description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+              description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
             },
           ),
           { additionalProperties: false },
@@ -183,8 +191,9 @@ export const SessionSelect = t.Partial(
     },
     {
       additionalProperties: false,
-      description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+      description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
     },
   ),
 );
@@ -194,8 +203,9 @@ export const SessionInclude = t.Partial(
     { user: t.Boolean(), _count: t.Boolean() },
     {
       additionalProperties: false,
-      description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+      description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
     },
   ),
 );
@@ -218,8 +228,9 @@ export const SessionOrderBy = t.Partial(
     },
     {
       additionalProperties: false,
-      description: `Sessions live in the database rather than in a signed cookie so that a
-logout or a password change can actually revoke them.`,
+      description: `*
+* Sessions live in the database rather than in a signed cookie so that a
+* logout or a password change can actually revoke them.`,
     },
   ),
 );
