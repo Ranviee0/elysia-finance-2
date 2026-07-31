@@ -1,2 +1,8 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+/* `dark` is the default, so a page renders dark before any script runs and
+   with no data-theme at all. `light` is only ever reached by an explicit
+   choice, which theme.js pins on <html> — see public/theme.js. */
+@plugin "daisyui" {
+  themes: dark --default, light;
+}

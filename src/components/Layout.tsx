@@ -96,6 +96,56 @@ const AccountIcon = () => (
   </svg>
 );
 
+const SunIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.8"
+    stroke="currentColor"
+    class="w-5 h-5"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-3.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+    />
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.8"
+    stroke="currentColor"
+    class="w-5 h-5"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+    />
+  </svg>
+);
+
+/* Rendered checked to match the dark default, so the icon is right for the
+   common case before theme.js gets to the body; it unticks this only for
+   someone who has explicitly chosen light. It shows up logged out as well,
+   because the login screen is a full page of theme too. */
+const ThemeToggle = () => (
+  <label class="swap swap-rotate btn btn-ghost btn-sm btn-circle" aria-label="Toggle dark mode">
+    <input type="checkbox" data-theme-toggle checked onchange="toggleTheme(this)" />
+    <span class="swap-on">
+      <MoonIcon />
+    </span>
+    <span class="swap-off">
+      <SunIcon />
+    </span>
+  </label>
+);
+
 /* Log out is a POST so that a prefetch or a stray <img src> can't end a
    session, which is why these are submit buttons rather than links.
    The form sits outside the menu and the buttons reach it by id: daisyUI
@@ -142,12 +192,17 @@ export const Layout = ({
   user?: { username: string } | null;
   children?: any;
 }) => (
-  <html lang="en" data-theme="light">
+  /* No data-theme here: theme.js sets it from the stored preference before
+     the first paint, and its absence is what lets the OS preference decide. */
+  <html lang="en">
     <head>
       <title>{title}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-      <meta name="theme-color" content="#ffffff" />
+      {/* Dark to match the default; theme.js rewrites it if light is chosen. */}
+      <meta name="theme-color" content="#1d232a" />
       <link rel="stylesheet" href="/public/tailwind.css" />
+      {/* Deliberately not deferred — it has to run before the page paints. */}
+      <script src="/public/theme.js"></script>
       <script src="/vendor/htmx/htmx.min.js"></script>
       <script src="/public/app.js" defer></script>
     </head>
@@ -159,22 +214,25 @@ export const Layout = ({
           </a>
         </div>
         {user ? (
-          <>
-            <nav role="tablist" class="tabs tabs-box hidden sm:flex">
-              {links.map((link) => (
-                <a
-                  role="tab"
-                  href={link.href}
-                  class={`tab ${currentPath === link.href ? "tab-active" : ""}`}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-            <div class="ml-2">
-              <AccountMenu username={user.username} />
-            </div>
-          </>
+          <nav role="tablist" class="tabs tabs-box hidden sm:flex">
+            {links.map((link) => (
+              <a
+                role="tab"
+                href={link.href}
+                class={`tab ${currentPath === link.href ? "tab-active" : ""}`}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
+        <div class="ml-2">
+          <ThemeToggle />
+        </div>
+        {user ? (
+          <div class="ml-1">
+            <AccountMenu username={user.username} />
+          </div>
         ) : null}
       </header>
       <main class="flex justify-center p-2 sm:p-6">
