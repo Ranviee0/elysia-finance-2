@@ -2,6 +2,7 @@ import { Html } from "@elysia/html";
 import type { CategoryView } from "./types";
 import { refreshCategories } from "./htmx";
 import { CategoryColorPicker } from "./CategoryColorPicker";
+import { CategoryTypePicker } from "./CategoryTypePicker";
 
 export const CategoryList = ({ categories }: { categories: CategoryView[] }) => (
   <ul class="list md:hidden">
@@ -12,6 +13,11 @@ export const CategoryList = ({ categories }: { categories: CategoryView[] }) => 
           <div class="truncate">{category.name}</div>
           <div class="text-xs text-base-content/60 font-mono">
             id: {category.id} · <span data-color-label={String(category.id)}>{category.color}</span>
+          </div>
+          {/* Its own line rather than beside the delete button: at this width
+              the two together push the name into truncating. */}
+          <div class="mt-1.5">
+            <CategoryTypePicker category={category} size="xs" />
           </div>
         </div>
         <button

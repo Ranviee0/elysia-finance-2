@@ -2,6 +2,9 @@ export type CategoryView = {
   id: number;
   name: string;
   color: string;
+  /* Optional because the copy embedded in a transaction is a narrower select
+     that never asked for it — only the categories endpoint returns it. */
+  categoryType?: string;
 };
 
 /* `color` is null when the transactions in this slice had no category, which

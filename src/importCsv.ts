@@ -274,7 +274,9 @@ export const importCsv = async (
 
         for (const category of categories) {
             const created = await tx.category.create({
-                data: { name: category.name, color: category.color, userId },
+                /* The CSV format predates categoryType and carries no column
+                   for it, so imported rows land unclassified like the rest. */
+                data: { name: category.name, color: category.color, categoryType: "", userId },
             });
             idByFileId.set(category.fileId, created.id);
         }

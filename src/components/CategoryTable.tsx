@@ -2,6 +2,7 @@ import { Html } from "@elysia/html";
 import type { CategoryView } from "./types";
 import { refreshCategories } from "./htmx";
 import { CategoryColorPicker } from "./CategoryColorPicker";
+import { CategoryTypePicker } from "./CategoryTypePicker";
 
 export const CategoryTable = ({ categories }: { categories: CategoryView[] }) => (
   <div class="hidden md:block overflow-x-auto">
@@ -10,6 +11,7 @@ export const CategoryTable = ({ categories }: { categories: CategoryView[] }) =>
         <tr>
           <th>ID</th>
           <th>Name</th>
+          <th>Type</th>
           <th>Color</th>
           <th></th>
         </tr>
@@ -19,6 +21,9 @@ export const CategoryTable = ({ categories }: { categories: CategoryView[] }) =>
           <tr class="row-hover">
             <td class="text-base-content/40">{category.id}</td>
             <td>{category.name}</td>
+            <td>
+              <CategoryTypePicker category={category} />
+            </td>
             <td>
               <span class="inline-flex items-center gap-2">
                 <CategoryColorPicker category={category} size="w-7 h-7" />

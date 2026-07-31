@@ -71,6 +71,15 @@ export const categoryPage = new Elysia()
                 <input type="text" name="name" required class="input w-full" placeholder="e.g. Groceries" />
               </fieldset>
               <fieldset class="fieldset">
+                <legend class="fieldset-legend">Type</legend>
+                <input
+                  type="text"
+                  name="categoryType"
+                  class="input w-full"
+                  placeholder="Optional, e.g. Fixed"
+                />
+              </fieldset>
+              <fieldset class="fieldset">
                 <legend class="fieldset-legend">Color</legend>
                 <div class="flex items-center gap-2">
                   <input
