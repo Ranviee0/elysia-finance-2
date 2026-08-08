@@ -169,3 +169,116 @@ document.addEventListener("submit", async (event) => {
      so the list is re-fetched rather than patched in place. */
   if (window.refreshTransactions) window.refreshTransactions();
 });
+
+/* Bulk transaction entry: a spreadsheet-style table at /transactions/bulk.
+   Rows aren't a <form> because the endpoint takes a JSON array body, not
+   form-encoded fields, so "Save all" is a hand-rolled fetch like the
+   single-field editor above. */
+
+/* A minute past whatever the last row is holding, so appending rows in a
+   row doesn't immediately trip the server's one-minute-apart clash check. */
+const nextBulkTime = () => {
+  const rows = document.querySelectorAll("#bulk-table tbody tr");
+  const last = rows[rows.length - 1];
+  const lastValue = last && last.querySelector('[data-field="transactionTime"]').value;
+  const base = lastValue ? new Date(lastValue) : new Date();
+  if (lastValue) base.setMinutes(base.getMinutes() + 1);
+  return toLocalInputValue(base.toISOString());
+};
+
+window.addBulkRow = () => {
+  const tbody = document.querySelector("#bulk-table tbody");
+  const rows = tbody.querySelectorAll("tr");
+  const time = nextBulkTime();
+  const row = rows[rows.length - 1].cloneNode(true);
+
+  row.querySelector('[data-field="type"]').value = "EXPENSE";
+  row.querySelector('[data-field="amount"]').value = "";
+  row.querySelector('[data-field="categoryId"]').value = "";
+  row.querySelector('[data-field="transactionTime"]').value = time;
+  row.querySelector('[data-field="note"]').value = "";
+
+  tbody.appendChild(row);
+  row.querySelector('[data-field="amount"]').focus();
+};
+
+window.removeBulkRow = (button) => {
+  const tbody = document.querySelector("#bulk-table tbody");
+  /* At least one row stays, so there's always something to clone for
+     "+ Add row" and something for "Save all" to read from. */
+  if (tbody.querySelectorAll("tr").length <= 1) return;
+  button.closest("tr").remove();
+};
+
+window.submitBulkTransactions = async () => {
+  const error = document.getElementById("bulk_error");
+  error.classList.add("hidden");
+  error.textContent = "";
+
+  const rows = document.querySelectorAll("#bulk-table tbody tr");
+  const transactions = [];
+
+  for (const row of rows) {
+    const type = row.querySelector('[data-field="type"]').value;
+    const amount = row.querySelector('[data-field="amount"]').value;
+    const categoryId = row.querySelector('[data-field="categoryId"]').value;
+    const transactionTime = row.querySelector('[data-field="transactionTime"]').value;
+    const note = row.querySelector('[data-field="note"]').value;
+
+    /* A spare blank row nobody touched is skipped rather than rejected, so
+       it doesn't block the save. */
+    if (!amount && !note) continue;
+
+    if (!amount || !transactionTime) {
+      error.textContent = "Every row needs an amount and a date & time.";
+      error.classList.remove("hidden");
+      return;
+    }
+
+    transactions.push({
+      type,
+      amount: Number(amount),
+      transactionTime: new Date(transactionTime).toISOString(),
+      categoryId: categoryId === "" ? undefined : Number(categoryId),
+      note: note || undefined,
+    });
+  }
+
+  if (transactions.length === 0) {
+    error.textContent = "Add at least one transaction.";
+    error.classList.remove("hidden");
+    return;
+  }
+
+  const indicator = document.getElementById("bulk-loading");
+  const saveBtn = document.getElementById("bulk-save-btn");
+  if (indicator) indicator.classList.add("htmx-request");
+  if (saveBtn) saveBtn.disabled = true;
+
+  let res;
+  try {
+    res = await fetch("/transactions/bulk", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(transactions),
+    });
+  } finally {
+    if (indicator) indicator.classList.remove("htmx-request");
+    if (saveBtn) saveBtn.disabled = false;
+  }
+
+  if (!res.ok) {
+    const text = await res.text();
+    let message = text;
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.summary || parsed.message || parsed.error || text;
+    } catch (e) { /* plain string */ }
+
+    error.textContent = message || "Failed to save transactions.";
+    error.classList.remove("hidden");
+    return;
+  }
+
+  window.location.href = "/";
+};

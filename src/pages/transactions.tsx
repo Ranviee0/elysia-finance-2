@@ -14,8 +14,10 @@ import { FIELD_LABELS } from "@/components/transactionFields";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /* Value format expected by <input type="datetime-local">, in local time.
-   The API parses it as local time too, so no timezone juggling is needed. */
-const toLocalInput = (date: Date) =>
+   The API parses it as local time too, so no timezone juggling is needed.
+   Exported because the bulk-entry page needs the same conversion for the
+   default time it stamps on each row. */
+export const toLocalInput = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
 const startOfToday = () => {
@@ -41,6 +43,20 @@ const filterQuery = t.Object({
   from: t.Optional(t.String()),
   until: t.Optional(t.String()),
 });
+
+const BulkAddIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.8"
+    stroke="currentColor"
+    class="w-5 h-5"
+  >
+    <rect x="3.75" y="3.75" width="16.5" height="16.5" rx="1.5" />
+    <path stroke-linecap="round" d="M3.75 9.75h16.5M3.75 15.75h16.5M9.75 3.75v16.5M15.75 3.75v16.5" />
+  </svg>
+);
 
 /* datetime-local omits seconds, which t.Date() won't accept, so widen it
    to a full ISO timestamp. Invalid input is dropped rather than 422'd. */
@@ -86,6 +102,13 @@ const TransactionsContent = ({
         <div class="flex items-center gap-3">
           <span id="transactions-loading" class="htmx-indicator loading loading-spinner loading-sm"></span>
           <span class="text-sm text-base-content/60">{transactions.length} entries</span>
+          {/* Icon-only on phones — the bulk-entry page itself is a desktop
+              spreadsheet, so this is a small target on mobile and grows a
+              label once there's room for the page it leads to. */}
+          <a href="/transactions/bulk" class="btn btn-ghost btn-sm" aria-label="Bulk add transactions">
+            <BulkAddIcon />
+            <span class="hidden sm:inline">Bulk add</span>
+          </a>
           <button type="button" class="btn btn-primary sm:btn-sm" onclick="add_transaction_modal.showModal()">
             + Add<span class="hidden sm:inline"> Transaction</span>
           </button>

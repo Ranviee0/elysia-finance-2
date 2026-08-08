@@ -5,6 +5,7 @@ import { categoryController } from "./controllers/categories";
 import { transactionController } from "./controllers/transactions";
 import { categoryPage } from "./pages/category";
 import { transactionsPage } from "./pages/transactions";
+import { transactionsBulkPage } from "./pages/transactionsBulk";
 import { exportPage } from "./pages/export";
 import { analyticsPage } from "./pages/analytics";
 import { authPage } from "./pages/auth";
@@ -18,6 +19,7 @@ const app = new Elysia()
   .use(categoryController)
   .use(transactionController)
   .use(transactionsPage)
+  .use(transactionsBulkPage)
   .use(categoryPage)
   .use(exportPage)
   .use(analyticsPage)

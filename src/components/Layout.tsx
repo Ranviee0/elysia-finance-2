@@ -185,11 +185,15 @@ export const Layout = ({
   title,
   currentPath,
   user,
+  wide,
   children,
 }: {
   title: string;
   currentPath: string;
   user?: { username: string } | null;
+  /* Opts a page out of the app's usual max-w-4xl reading column — for a
+     spreadsheet-style page that needs the extra room on desktop. */
+  wide?: boolean;
   children?: any;
 }) => (
   /* No data-theme here: theme.js sets it from the stored preference before
@@ -236,7 +240,7 @@ export const Layout = ({
         ) : null}
       </header>
       <main class="flex justify-center p-2 sm:p-6">
-        <div class="w-full max-w-4xl">{children}</div>
+        <div class={`w-full ${wide ? "max-w-6xl" : "max-w-4xl"}`}>{children}</div>
       </main>
       <dialog id="confirm_dialog" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box">
