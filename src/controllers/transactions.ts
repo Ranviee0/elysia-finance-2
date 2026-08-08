@@ -206,6 +206,92 @@ export const transactionController = new Elysia({ prefix: "/transactions" })
             requireUser: true
         }
     )
+    .post(
+        "/bulk",
+        async ({ body, status, user }) => {
+
+            // Check duplicate time inside body
+
+            const hasDuplicateTimes =
+                new Set(body.map(({ transactionTime }) => transactionTime.getTime())).size !== body.length;
+                
+            if (hasDuplicateTimes) {
+                return status(400, {
+                    error: "Duplicate transaction times are not allowed",
+                });
+            }
+
+            // Validate each object inside loop
+
+            for (const { type, amount, transactionTime, categoryId, note } of body) {
+
+                const transactionsWithExactSameTime = await prisma.transaction.findMany({
+                    where: {
+                        transactionTime: transactionTime,
+                        userId: user.id,
+                    },
+                });
+
+                if (transactionsWithExactSameTime.length > 0) {
+                    return status(400, "Transaction time clash! Please select new time that is at least 1 minutes apart from existing transactions.")
+                }
+
+
+                if (categoryId !== undefined && categoryId !== null) {
+                    const categoryExists = await prisma.category.findFirst({
+                        where: { id: categoryId, userId: user.id },
+                    });
+
+                    if (!categoryExists) {
+                        return status(400, "Category not found");
+                    }
+                }
+
+            }
+
+            // Transaction
+
+            try {
+                const transactions = await prisma.$transaction(async (tx) => {
+                    return tx.transaction.createManyAndReturn({
+                        data: body.map(
+                            ({ type, amount, transactionTime, categoryId, note }) => ({
+                                type,
+                                amount,
+                                transactionTime,
+                                categoryId,
+                                note,
+                                userId: user.id,
+                            }),
+                        ),
+                    });
+                });
+
+                return status(201, transactions);
+            } catch (error) {
+                console.error(error);
+
+                return status(500, {
+                    error: "Failed to create transactions",
+                });
+            }
+        },
+        {
+            body:
+                t.Array(
+                    t.Object(
+                        {
+                            ...transactionInputProperties,
+                            amount: t.Numeric(),
+                            /* Validation that categoryId is an integer*/
+                            categoryId: t.Optional(t.Nullable(t.Numeric())),
+                        },
+                        { additionalProperties: false },
+                    )
+                ),
+            requireUser: true
+        }
+    )
     .patch(
         "/category/:id",
         async ({ body, status, params: { id }, user }) => {
